@@ -36,12 +36,49 @@ export const signIn = CatchError(async (req, res) => {
 
   const isPassword = await bcrypt.compare(password, isUser.password);
   if (!isPassword) throw new AppError("Incorrect Password", 400);
-  const { id, userName, firstName, age, role } = isUser;
+  const { id, userName, firstName, lastName, age, role } = isUser;
   const token = Jwt.sign(
-    { id, userName, firstName, age, role },
+    { id, userName, firstName, lastName, age, role },
     process.env.SECRET_KEY
   );
   res
     .status(200)
     .json({ message: `Logged in successfully,Welcome ${userName}`, token });
+});
+export const updateUser = CatchError(async (req, res) => {
+  const { id } = req.user;
+  const { userName, firstName, lastName, email, password, role, age } =
+    req.body;
+  const user = await userModel.findByPk(id);
+  if (!user) throw new AppError("User not found", 404);
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const data = await userModel.update(
+    {
+      userName,
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+      role,
+      age,
+    },
+
+    {
+      where: {
+        id: id,
+      },
+    },
+    { new: true }
+  );
+  res.status(200).json({ message: "User updated", data });
+});
+export const deleteUser = CatchError(async (req, res) => {
+  const { id } = req.user;
+  const user = await userModel.findByPk(id);
+  if (!user) throw new AppError("User not found", 404);
+
+  const data = await userModel.destroy({ where: { id: id } });
+  res.status(200).json({ message: "User deleted", data });
 });

@@ -8,6 +8,10 @@ const app = express();
 
 app.use(express.json());
 app.use("/users", userRouter);
+
+app.all("*", (req, res, next) => {
+  throw new AppError("Can't find this route", 400);
+});
 app.use((error, req, res, next) => {
   console.log(error);
   const { status, message, stack } = error;
