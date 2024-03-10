@@ -2,6 +2,7 @@ import userModel from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import { CatchError, AppError } from "../../utils/errorhandler.js";
 import Jwt from "jsonwebtoken";
+
 export const getAllUsers = CatchError(async (req, res) => {
   const users = await userModel.findAll();
   if (users.length === 0) throw new AppError("No users found", 404);
