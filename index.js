@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import userRouter from "./src/user/routers/usre.routes.js";
+import { AppError } from "./src/utils/errorhandler.js";
 
 dotenv.config();
 
@@ -13,7 +14,6 @@ app.all("*", (req, res, next) => {
   throw new AppError("Can't find this route", 400);
 });
 app.use((error, req, res, next) => {
-  console.log(error);
   const { status, message, stack } = error;
   res.status(status || 500).json({
     message,

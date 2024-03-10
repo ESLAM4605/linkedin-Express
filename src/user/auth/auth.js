@@ -1,9 +1,11 @@
 import Jwt from "jsonwebtoken";
 import { AppError } from "../../utils/errorhandler.js";
 export const authentecation = (req, res, next) => {
-  const token = req.header("token");
+  let token = req.header("token");
   if (!token) throw new AppError("UnAuthorized", 401);
-  Jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
+  if (!token.startsWith("bearer__")) throw new AppError("Invalid token", 401);
+  token = token.split("bearer__");
+  Jwt.verify(token[1], process.env.SECRET_KEY, (err, decoded) => {
     // err
     if (err) throw new AppError(err.message, 498);
     // decoded undefined
