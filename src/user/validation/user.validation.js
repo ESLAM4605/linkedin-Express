@@ -47,3 +47,14 @@ export const updateUserValidation = (req, res, next) => {
   validator(req, schema);
   next();
 };
+export const changingPasswordVali = (req, res, next) => {
+  const schema = Joi.object({
+    body: {
+      oldPassword: Joi.string().min(3).max(12).required(),
+      newPassword: Joi.string().min(3).max(12).required(),
+      confirmPassword: Joi.string().min(3).max(12).required(),
+    },
+  });
+  validator(req, schema);
+  next();
+};
