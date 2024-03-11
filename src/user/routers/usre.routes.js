@@ -6,6 +6,7 @@ import {
   updateUser,
   deleteUser,
   changePassword,
+  searchForOneUser,
 } from "../controllers/user.controller.js";
 import { authorized, authentecation } from "../../user/auth/auth.js";
 import {
@@ -16,6 +17,7 @@ import {
 } from "../validation/user.validation.js";
 const router = Router();
 router.route("/").get(getAllUsers).post(signUpValidation, signUp);
+router.get("/search", searchForOneUser);
 router
   .route("/update/password")
   .put(authentecation, changingPasswordVali, changePassword);

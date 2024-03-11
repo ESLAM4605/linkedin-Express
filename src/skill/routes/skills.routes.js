@@ -3,6 +3,7 @@ import {
   createSkill,
   deleteSkill,
   getAllSkills,
+  searchByQuery,
   updateSkill,
 } from "../controllers/skills.controllers.js";
 import { authentecation, authorized } from "../../user/auth/auth.js";
@@ -14,16 +15,14 @@ import {
 
 const router = Router();
 
-router
-  .route("/")
-  .get(getAllSkills)
-  .post(
-    createSkillValidation,
-    authentecation,
-    authorized("admin"),
-    createSkill
-  );
+router.route("/").get(getAllSkills).post(
+  createSkillValidation,
+  authentecation,
+  // authorized("admin"),
+  createSkill
+);
 
+router.get("/search", searchByQuery);
 router
   .route("/update/:id")
   .put(updateSkillValidation, authentecation, authorized("admin"), updateSkill);
