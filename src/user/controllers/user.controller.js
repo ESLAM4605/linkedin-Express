@@ -2,13 +2,28 @@ import userModel from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import { CatchError, AppError } from "../../utils/errorhandler.js";
 import Jwt from "jsonwebtoken";
-
+import { Op } from "sequelize";
 export const getAllUsers = CatchError(async (req, res) => {
   const users = await userModel.findAll();
   if (users.length === 0) throw new AppError("No users found", 404);
   res.status(200).json(users);
 });
-
+export const searchForOneUser = CatchError(async (req, res) => {
+  const { user } = req.query;
+  const isUser = await userModel.findAll({
+    where: { userName: { [Op.like]: `%${user}%` } },
+  });
+  if (isUser.length) return res.status(200).json(isUser);
+  const isUser2 = await userModel.findAll({
+    where: { firstName: { [Op.like]: `%${user}%` } },
+  });
+  if (isUser2.length) return res.status(200).json(isUser2);
+  const isUser3 = await userModel.findAll({
+    where: { lastName: { [Op.like]: `%${user}%` } },
+  });
+  if (isUser3.length) return res.status(200).json(isUser3);
+  throw new AppError("No user found", 404);
+});
 export const signUp = CatchError(async (req, res) => {
   const { userName, firstName, lastName, email, password, age, role } =
     req.body;
