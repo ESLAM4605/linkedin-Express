@@ -10,6 +10,9 @@ export const validator = (req, schema) => {
   if (Object.values(params).length) ValedateObject.params = params;
   if (Object.values(query).length) ValedateObject.query = query;
   const { error } = schema.validate(ValedateObject, { abortEarly: false });
-  if (error)
-    throw new AppError(error.details[0].message.split('"').join(""), 400);
+  if (error) {
+    throw new AppError(
+      error.details.map((det) => det.message.split('"').join(""), 400)
+    );
+  }
 };
