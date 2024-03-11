@@ -1,0 +1,39 @@
+import { Router } from "express";
+import {
+  createSkill,
+  deleteSkill,
+  getAllSkills,
+  updateSkill,
+} from "../controllers/skills.controllers.js";
+import { authentecation, authorized } from "../../user/auth/auth.js";
+import {
+  createSkillValidation,
+  deleteSkillValidation,
+  updateSkillValidation,
+} from "../validation/skills.validation.js";
+
+const router = Router();
+
+router
+  .route("/")
+  .get(getAllSkills)
+  .post(
+    createSkillValidation,
+    authentecation,
+    authorized("admin"),
+    createSkill
+  );
+
+router
+  .route("/update/:id")
+  .put(updateSkillValidation, authentecation, authorized("admin"), updateSkill);
+router
+  .route("/delete/:id")
+  .delete(
+    deleteSkillValidation,
+    authentecation,
+    authorized("admin"),
+    deleteSkill
+  );
+
+export default router;

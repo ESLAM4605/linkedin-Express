@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import userRouter from "./src/user/routers/usre.routes.js";
 import postRouter from "./src/post/routes/posts.routes.js";
+import skillRouter from "./src/skill/routes/skills.routes.js";
 import { AppError } from "./src/utils/errorhandler.js";
 
 dotenv.config();
@@ -11,6 +12,7 @@ const app = express();
 app.use(express.json());
 app.use("/users", userRouter);
 app.use("/posts", postRouter);
+app.use("/skills", skillRouter);
 
 app.all("*", (req, res, next) => {
   throw new AppError("Can't find this route", 400);
