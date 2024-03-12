@@ -11,8 +11,6 @@ export const signUpValidation = (req, res, next) => {
       age: Joi.number().integer().min(10).max(100),
       role: Joi.string().valid("user", "admin"),
     },
-    params: {},
-    query: {},
   });
   validator(req, schema);
   next();
@@ -23,8 +21,6 @@ export const signInValidation = (req, res, next) => {
       email: Joi.string().email().required(),
       password: Joi.string().required(),
     },
-    params: {},
-    query: {},
   });
   validator(req, schema);
   next();
@@ -41,8 +37,6 @@ export const updateUserValidation = (req, res, next) => {
       age: Joi.number().integer().min(10).max(100),
       role: Joi.string().valid("user", "admin"),
     },
-    params: {},
-    query: {},
   });
   validator(req, schema);
   next();
