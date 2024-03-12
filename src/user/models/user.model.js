@@ -41,6 +41,5 @@ const userModel = sequelize.define("user", {
     allowNull: true,
   },
 });
-userModel.sync();
 
 export default userModel;

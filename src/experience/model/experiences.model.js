@@ -54,6 +54,5 @@ experienceModel.belongsTo(userModel, {
   targetKey: "id",
 });
 userModel.hasMany(experienceModel, { foreignKey: "userId" });
-experienceModel.sync();
 
 export default experienceModel;
