@@ -12,5 +12,5 @@ const skillModel = sequelize.define("Skill", {
     allowNull: false,
   },
 });
-skillModel.sync();
+
 export default skillModel;

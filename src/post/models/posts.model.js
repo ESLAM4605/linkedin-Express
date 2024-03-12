@@ -20,5 +20,5 @@ const postModel = sequelize.define("Post", {
 });
 postModel.belongsTo(userModel, { foreignKey: "userID", targetKey: "id" });
 userModel.hasMany(postModel, { foreignKey: "userID" });
-postModel.sync();
+
 export default postModel;
