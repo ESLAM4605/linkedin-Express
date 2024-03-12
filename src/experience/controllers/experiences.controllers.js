@@ -1,5 +1,6 @@
 import { AppError, CatchError } from "../../utils/errorhandler.js";
 import experienceModel from "../model/experiences.model.js";
+import UserSkillModel from "../model/user-skills.model.js";
 
 export const getAllExperiences = CatchError(async (req, res) => {
   const experiences = await experienceModel.findAll();
@@ -12,7 +13,25 @@ export const getAllExperiences = CatchError(async (req, res) => {
 export const createExperience = CatchError(async (req, res) => {
   const { id: userId } = req.user;
   req.body.userId = userId;
+
+  const { skills, ...otherFields } = req.body;
+
+  otherFields.userId = userId;
+
   const experience = await experienceModel.create(req.body);
+
+  const userSkills = [];
+
+  for (const skill of skills) {
+    userSkills.push({
+      userId,
+      experienceId: experience.id,
+      skillId: skill,
+    });
+  }
+
+  await UserSkillModel.bulkCreate(userSkills);
+
   res.status(201).json({ message: "Added Successfully", experience });
 });
 

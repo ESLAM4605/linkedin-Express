@@ -4,7 +4,6 @@ import { Op } from "sequelize";
 
 export const getAllSkills = CatchError(async (req, res) => {
   const skills = await skillModel.findAll();
-  if (skills.length === 0) throw new AppError("No skills found", 404);
   res.status(200).json(skills);
 });
 
