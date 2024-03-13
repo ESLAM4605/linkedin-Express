@@ -9,7 +9,6 @@ export const signUpValidation = (req, res, next) => {
       email: Joi.string().email().required(),
       password: Joi.string().required(),
       age: Joi.number().integer().min(10).max(100),
-      role: Joi.string().valid("user", "admin"),
     },
   });
   validator(req, schema);

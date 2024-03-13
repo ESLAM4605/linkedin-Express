@@ -19,6 +19,7 @@ export const createExperienceValidation = (req, res, next) => {
       startDate: Joi.date(),
       endDate: Joi.date(),
       description: Joi.string(),
+      skills: Joi.array().items(Joi.number().integer()),
     },
   });
   validator(req, schema);
