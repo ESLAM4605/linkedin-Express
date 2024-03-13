@@ -18,6 +18,25 @@ export const createExperience = CatchError(async (req, res) => {
 
   otherFields.userId = userId;
 
+  const existingSkills = await UserSkillModel.findAll({
+    where: {
+      userId: userId,
+      skillId: skills,
+    },
+  });
+  console.log(existingSkills);
+
+  if (existingSkills.length > 0) {
+    const existingSkillNames = existingSkills
+      .map((skill) => skill.skillId)
+      .join(", ");
+    console.log();
+    throw new AppError(
+      `Cannot choose skills (${existingSkillNames}) again.`,
+      400
+    );
+  }
+
   const experience = await experienceModel.create(req.body);
 
   const userSkills = [];
