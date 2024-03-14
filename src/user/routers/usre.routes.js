@@ -16,8 +16,12 @@ import {
   updateUserValidation,
   changingPasswordVali,
 } from "../validation/user.validation.js";
+import { uploadMiddleware } from "../../middlewares/uoploadpic.middleware.js";
 const router = Router();
-router.route("/").get(getAllUsers).post(signUpValidation, signUp);
+router
+  .route("/")
+  .get(getAllUsers)
+  .post(uploadMiddleware, signUpValidation, signUp);
 router.route("/profile").get(getProfileInfo);
 router.get("/search", searchForOneUser);
 router
