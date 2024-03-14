@@ -10,46 +10,38 @@ export const getAllExperiences = CatchError(async (req, res) => {
   res.status(200).json(experiences);
 });
 
-export const createExperience = CatchError(async (req, res) => {
+const createExperience = CatchError(async (req, res) => {
   const { id: userId } = req.user;
   req.body.userId = userId;
 
   const { skills, ...otherFields } = req.body;
-
   otherFields.userId = userId;
-  const existingSkills = await UserSkillModel.findAll({
-    where: {
-      userId: userId,
-      skillId: skills,
-    },
-  });
 
-  if (existingSkills.length > 0) {
-    const existingSkillNames = existingSkills
-      .map((skill) => skill.skillId)
-      .join(", ");
+  const transaction = await sequelize.transaction();
 
-    throw new AppError(
-      `Cannot choose skills (${existingSkillNames}) again.`,
-      400
-    );
-  }
+  try {
+    const experience = await experienceModel.create(req.body, {
+      transaction: transaction,
+    });
 
-  const experience = await experienceModel.create(req.body);
-
-  const userSkills = [];
-
-  for (const skill of skills) {
-    userSkills.push({
+    const userSkills = skills.map((skill) => ({
       userId,
       experienceId: experience.id,
       skillId: skill,
-    });
+    }));
+
+    //network down
+    // Bulk create userSkills within the transaction
+    await UserSkillModel.bulkCreate(userSkills, { transaction: transaction });
+
+    // If all operations are successful, commit the transaction
+    await transaction.commit();
+
+    res.status(201).json({ message: "Added Successfully", experience });
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
   }
-
-  await UserSkillModel.bulkCreate(userSkills);
-
-  res.status(201).json({ message: "Added Successfully", experience });
 });
 
 export const updateExperience = CatchError(async (req, res) => {
