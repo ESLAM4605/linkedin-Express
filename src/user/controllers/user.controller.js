@@ -3,6 +3,9 @@ import bcrypt from "bcryptjs";
 import { CatchError, AppError } from "../../utils/errorhandler.js";
 import Jwt from "jsonwebtoken";
 import { Op } from "sequelize";
+import experienceModel from "../../experience/model/experiences.model.js";
+import UserSkillModel from "../../experience/model/user-skills.model.js";
+import skillModel from "../../skill/model/skills.model.js";
 export const getAllUsers = CatchError(async (req, res) => {
   const users = await userModel.findAll();
   if (users.length === 0) throw new AppError("No users found", 404);
@@ -10,18 +13,12 @@ export const getAllUsers = CatchError(async (req, res) => {
 });
 export const searchForOneUser = CatchError(async (req, res) => {
   const { user } = req.query;
-  const isUser = await userModel.findAll({
-    where: { userName: { [Op.like]: `%${user}%` } },
+  const users = await userModel.findAll({
+    where: {
+      [Op.or]: [{ userName: user }, { firstName: user }, { lastName: user }],
+    },
   });
-  if (isUser.length) return res.status(200).json(isUser);
-  const isUser2 = await userModel.findAll({
-    where: { firstName: { [Op.like]: `%${user}%` } },
-  });
-  if (isUser2.length) return res.status(200).json(isUser2);
-  const isUser3 = await userModel.findAll({
-    where: { lastName: { [Op.like]: `%${user}%` } },
-  });
-  if (isUser3.length) return res.status(200).json(isUser3);
+  if (users.length) return res.status(200).json(users);
   throw new AppError("No user found", 404);
 });
 export const signUp = CatchError(async (req, res) => {
@@ -40,7 +37,6 @@ export const signUp = CatchError(async (req, res) => {
     email,
     password: hashedPassword,
     age,
-    role,
   });
   if (newUser) return res.status(201).json({ message: "User Added", newUser });
   throw new AppError("Something went wrong", 500);
@@ -63,7 +59,7 @@ export const signIn = CatchError(async (req, res) => {
 
 export const updateUser = CatchError(async (req, res) => {
   const { id } = req.user;
-  const { userName, firstName, lastName, email, role, age } = req.body;
+  const { userName, firstName, lastName, email, role, age, About } = req.body;
   const user = await userModel.findByPk(id);
   if (!user) throw new AppError("User not found", 404);
   const data = await userModel.update(
@@ -74,6 +70,7 @@ export const updateUser = CatchError(async (req, res) => {
       email,
       role,
       age,
+      About,
     },
     {
       where: {
@@ -111,4 +108,42 @@ export const deleteUser = CatchError(async (req, res) => {
   if (!user) throw new AppError("User not found", 404);
   const data = await userModel.destroy({ where: { id } });
   res.status(200).json({ message: "User deleted", data });
+});
+
+export const getProfileInfo = CatchError(async (req, res) => {
+  const isUser = await userModel.findOne({
+    where: { userName: req.query.userName },
+    attributes: { exclude: ["password", "role", "id"] },
+    include: [
+      {
+        model: experienceModel,
+        include: [
+          {
+            model: UserSkillModel,
+            attributes: ["skillId"],
+            include: { model: skillModel, attributes: ["name"] },
+          },
+        ],
+        attributes: [
+          "title",
+          "employmentType",
+          "CompanyName",
+          "location",
+          "startDate",
+          "endDate",
+          "description",
+        ],
+        limit: 1,
+      },
+      {
+        model: UserSkillModel,
+        attributes: ["skillId"],
+        include: [{ model: skillModel, attributes: ["name"] }],
+        limit: 1,
+      },
+    ],
+  });
+  console.log(isUser.dataValues.Experiences[0].dataValues);
+  if (!isUser) throw new AppError("User not found", 404);
+  res.status(200).json(isUser);
 });

@@ -34,7 +34,7 @@ export const updateUserValidation = (req, res, next) => {
       email: Joi.string().email(),
       password: Joi.string(),
       age: Joi.number().integer().min(10).max(100),
-      role: Joi.string().valid("user", "admin"),
+      About: Joi.string().min(3).max(200),
     },
   });
   validator(req, schema);

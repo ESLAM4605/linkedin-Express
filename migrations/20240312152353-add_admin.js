@@ -1,9 +1,9 @@
-'use strict';
+"use strict";
 const bcrypt = require("bcrypt");
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {
+  async up(queryInterface, Sequelize) {
     const hashedPassword = await bcrypt.hash(
       "password",
       parseInt(process.env.ROUNDS)
@@ -17,7 +17,7 @@ module.exports = {
           userName: "admin",
           firstName: "admin",
           lastName: "admin",
-          email: "admin",
+          email: "admin@gmail.com",
           password: hashedPassword,
           age: 0,
           role: "admin",
@@ -27,16 +27,14 @@ module.exports = {
       ],
       {}
     );
-    
-
   },
 
-  async down (queryInterface, Sequelize) {
+  async down(queryInterface, Sequelize) {
     /**
      * Add reverting commands here.
      *
      * Example:
      * await queryInterface.dropTable('users');
      */
-  }
+  },
 };

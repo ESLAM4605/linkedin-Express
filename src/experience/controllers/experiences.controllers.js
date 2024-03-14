@@ -1,7 +1,7 @@
 import { AppError, CatchError } from "../../utils/errorhandler.js";
 import experienceModel from "../model/experiences.model.js";
 import UserSkillModel from "../model/user-skills.model.js";
-
+import skillModel from "../../skill/model/skills.model.js";
 export const getAllExperiences = CatchError(async (req, res) => {
   const experiences = await experienceModel.findAll();
   if (experiences.length === 0) {
@@ -17,6 +17,24 @@ export const createExperience = CatchError(async (req, res) => {
   const { skills, ...otherFields } = req.body;
 
   otherFields.userId = userId;
+  const existingSkills = await UserSkillModel.findAll({
+    where: {
+      userId: userId,
+      skillId: skills,
+    },
+  });
+  console.log(existingSkills);
+
+  if (existingSkills.length > 0) {
+    const existingSkillNames = existingSkills
+      .map((skill) => skill.skillId)
+      .join(", ");
+
+    throw new AppError(
+      `Cannot choose skills (${existingSkillNames}) again.`,
+      400
+    );
+  }
 
   const experience = await experienceModel.create(req.body);
 
