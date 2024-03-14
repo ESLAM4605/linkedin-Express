@@ -40,6 +40,10 @@ const userModel = sequelize.define("user", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  About: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
 });
 
 export default userModel;

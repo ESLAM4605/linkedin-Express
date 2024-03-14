@@ -17,7 +17,7 @@ module.exports = {
           userName: "admin",
           firstName: "admin",
           lastName: "admin",
-          email: "admin",
+          email: "admin@gmail.com",
           password: hashedPassword,
           age: 0,
           role: "admin",

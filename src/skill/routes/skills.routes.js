@@ -15,12 +15,15 @@ import {
 
 const router = Router();
 
-router.route("/").get(getAllSkills).post(
-  createSkillValidation,
-  authentecation,
-  // authorized("admin"),
-  createSkill
-);
+router
+  .route("/")
+  .get(getAllSkills)
+  .post(
+    createSkillValidation,
+    authentecation,
+    authorized("admin"),
+    createSkill
+  );
 
 router.get("/search", searchByQuery);
 router
