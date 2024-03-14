@@ -23,32 +23,12 @@ export const createExperience = CatchError(async (req, res) => {
       skillId: skills,
     },
   });
-  console.log(existingSkills);
 
   if (existingSkills.length > 0) {
     const existingSkillNames = existingSkills
       .map((skill) => skill.skillId)
       .join(", ");
 
-    throw new AppError(
-      `Cannot choose skills (${existingSkillNames}) again.`,
-      400
-    );
-  }
-
-  const existingSkills = await UserSkillModel.findAll({
-    where: {
-      userId: userId,
-      skillId: skills,
-    },
-  });
-  console.log(existingSkills);
-
-  if (existingSkills.length > 0) {
-    const existingSkillNames = existingSkills
-      .map((skill) => skill.skillId)
-      .join(", ");
-    console.log();
     throw new AppError(
       `Cannot choose skills (${existingSkillNames}) again.`,
       400
@@ -74,10 +54,11 @@ export const createExperience = CatchError(async (req, res) => {
 
 export const updateExperience = CatchError(async (req, res) => {
   const { id } = req.user;
-  const isExperience = await experienceModel.findByPk(req.params.id);
+  const isExperience = await experienceModel.findOne({
+    where: { id: req.params.id, userId: id },
+  });
   if (!isExperience) throw new AppError("can't find Experience", 404);
-  if (isExperience.userId !== id)
-    throw new AppError("You are not the Owner", 400);
+
   const updateExperience = await experienceModel.update(req.body, {
     where: { id: req.params.id },
   });
@@ -87,13 +68,18 @@ export const updateExperience = CatchError(async (req, res) => {
 export const deleteExperience = CatchError(async (req, res) => {
   const { id } = req.user;
 
-  const isExperience = await experienceModel.findByPk(req.params.id);
+  const isExperience = await experienceModel.findOne({
+    where: { id: req.params.id, userId: id },
+  });
   if (!isExperience) throw new AppError("can't find Experience", 404);
 
-  if (isExperience.userId !== id)
-    throw new AppError("You are not the Owner", 400);
+  const deleteUserSkills = await UserSkillModel.destroy({
+    where: { experienceId: isExperience.id },
+  });
+
   const deletExperience = await experienceModel.destroy({
     where: { id: isExperience.id },
   });
+
   res.status(200).json({ message: "deleted", deletExperience });
 });

@@ -1,4 +1,10 @@
 import express from "express";
+import path, { dirname } from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
+
+export const __dirname = dirname(fileURLToPath(import.meta.url));
+
 import dotenv from "dotenv";
 import userRouter from "./src/user/routers/usre.routes.js";
 import postRouter from "./src/post/routes/posts.routes.js";
@@ -21,6 +27,8 @@ app.all("*", (req, res, next) => {
 });
 app.use((error, req, res, next) => {
   const { status, message, stack } = error;
+  if (req.file)
+    fs.unlinkSync(path.join(__dirname, "uploads", req.file.filename));
   res.status(status || 500).json({
     message,
     stack,

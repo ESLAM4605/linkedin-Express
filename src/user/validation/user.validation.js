@@ -10,6 +10,7 @@ export const signUpValidation = (req, res, next) => {
       password: Joi.string().required(),
       age: Joi.number().integer().min(10).max(100),
     },
+    file: Joi.object(),
   });
   validator(req, schema);
   next();

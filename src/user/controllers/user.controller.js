@@ -6,6 +6,8 @@ import { Op } from "sequelize";
 import experienceModel from "../../experience/model/experiences.model.js";
 import UserSkillModel from "../../experience/model/user-skills.model.js";
 import skillModel from "../../skill/model/skills.model.js";
+import imageModel from "../../image/models/images.model.js";
+
 export const getAllUsers = CatchError(async (req, res) => {
   const users = await userModel.findAll();
   if (users.length === 0) throw new AppError("No users found", 404);
@@ -22,14 +24,14 @@ export const searchForOneUser = CatchError(async (req, res) => {
   throw new AppError("No user found", 404);
 });
 export const signUp = CatchError(async (req, res) => {
-  const { userName, firstName, lastName, email, password, age, role } =
-    req.body;
+  const { userName, firstName, lastName, email, password, age } = req.body;
   const user = await userModel.findOne({ where: { email } });
   if (user) throw new AppError("User already exists", 400);
   const hashedPassword = await bcrypt.hash(
     password,
     parseInt(process.env.ROUNDS)
   );
+  // console.log(req.file.originalname);
   const newUser = await userModel.create({
     userName,
     firstName,
@@ -38,7 +40,22 @@ export const signUp = CatchError(async (req, res) => {
     password: hashedPassword,
     age,
   });
-  if (newUser) return res.status(201).json({ message: "User Added", newUser });
+
+  const img = await imageModel.create({
+    name: req.file.originalname,
+    path: req.file.filename,
+    userId: newUser.id,
+  });
+
+  const updatedUser = await userModel.update(
+    { profilePicture: img.id },
+    { where: { id: newUser.id } }
+  );
+
+  if (newUser)
+    return res
+      .status(201)
+      .json({ message: "Signed Up Successfully", updatedUser });
   throw new AppError("Something went wrong", 500);
 });
 export const signIn = CatchError(async (req, res) => {
@@ -143,7 +160,7 @@ export const getProfileInfo = CatchError(async (req, res) => {
       },
     ],
   });
-  console.log(isUser.dataValues.Experiences[0].dataValues);
+
   if (!isUser) throw new AppError("User not found", 404);
   res.status(200).json(isUser);
 });
