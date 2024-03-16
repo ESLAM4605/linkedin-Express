@@ -41,6 +41,15 @@ export const updateUserValidation = (req, res, next) => {
   validator(req, schema);
   next();
 };
+export const updateInActiveValidation = (req, res, next) => {
+  const schema = Joi.object({
+    query: {
+      userName: Joi.string().min(3).max(30).required(),
+    },
+  });
+  validator(req, schema);
+  next();
+};
 export const changingPasswordVali = (req, res, next) => {
   const schema = Joi.object({
     body: {

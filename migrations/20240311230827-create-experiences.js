@@ -52,8 +52,6 @@ module.exports = {
           model: "Users", // Make sure to match the actual model name
           key: "id",
         },
-        onUpdate: "CASCADE",
-        onDelete: "CASCADE",
       },
       createdAt: {
         allowNull: false,

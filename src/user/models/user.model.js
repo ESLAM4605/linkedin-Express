@@ -10,6 +10,7 @@ const userModel = sequelize.define("user", {
   userName: {
     type: DataTypes.STRING,
     allowNull: false,
+    unique: true,
   },
   firstName: {
     type: DataTypes.STRING,
@@ -22,6 +23,7 @@ const userModel = sequelize.define("user", {
   email: {
     type: DataTypes.STRING,
     allowNull: false,
+    unique: true,
   },
   password: {
     type: DataTypes.STRING,
@@ -43,6 +45,10 @@ const userModel = sequelize.define("user", {
   About: {
     type: DataTypes.TEXT,
     allowNull: true,
+  },
+  removed: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
   },
 });
 
