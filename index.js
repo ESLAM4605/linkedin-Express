@@ -10,6 +10,7 @@ import userRouter from "./src/user/routers/usre.routes.js";
 import postRouter from "./src/post/routes/posts.routes.js";
 import skillRouter from "./src/skill/routes/skills.routes.js";
 import experiencesRouter from "./src/experience/routes/experiences.routes.js";
+import educationRouter from "./src/education/routes/education.router.js";
 import { AppError } from "./src/utils/errorhandler.js";
 
 dotenv.config();
@@ -21,6 +22,7 @@ app.use("/users", userRouter);
 app.use("/posts", postRouter);
 app.use("/skills", skillRouter);
 app.use("/experiences", experiencesRouter);
+app.use("/education", educationRouter);
 
 app.all("*", (req, res, next) => {
   throw new AppError("Can't find this route", 400);

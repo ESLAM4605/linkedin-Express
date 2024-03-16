@@ -1,49 +1,41 @@
-// migrations/YYYYMMDDHHMMSS-create_users_table.js
-
 "use strict";
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("Users", {
+    await queryInterface.createTable("Educations", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      userName: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        unique: true,
-      },
-      firstName: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      lastName: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      email: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        unique: true,
-      },
-      password: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      age: {
+      userId: {
         type: Sequelize.INTEGER,
-        allowNull: true,
+        allowNull: false,
+        references: { model: "Users", key: "id" },
       },
-      role: {
-        type: Sequelize.ENUM("user", "admin"),
-        defaultValue: "user",
+      degree: {
+        type: Sequelize.STRING,
         allowNull: false,
       },
-      profilePicture: {
+      school: {
         type: Sequelize.STRING,
+        allowNull: false,
+      },
+      fieldOfStudy: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      Description: {
+        type: Sequelize.TEXT,
+        allowNull: false,
+      },
+      startDate: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+      endDate: {
+        type: Sequelize.DATE,
         allowNull: true,
       },
       createdAt: {
@@ -54,10 +46,14 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE,
       },
+      deletedAt: {
+        allowNull: false,
+        type: Sequelize.DATE,
+      },
     });
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("Users");
+    await queryInterface.dropTable("Educations");
   },
 };

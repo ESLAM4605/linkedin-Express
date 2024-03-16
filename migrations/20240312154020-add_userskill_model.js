@@ -17,14 +17,12 @@ module.exports = {
           model: "Users", // Make sure to match the actual table name for the User model
           key: "id",
         },
-        onUpdate: "CASCADE",
-        onDelete: "CASCADE",
       },
       experienceId: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: "Experiences", // Make sure to match the actual table name for the User model
+          model: "Experiences",
           key: "id",
         },
       },
@@ -32,7 +30,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: "Skills", // Make sure to match the actual table name for the User model
+          model: "Skills",
           key: "id",
         },
       },
@@ -45,7 +43,7 @@ module.exports = {
         type: Sequelize.DATE,
       },
       deletedAt: {
-        allowNull: true,
+        allowNull: false,
         type: Sequelize.DATE,
       },
     });
