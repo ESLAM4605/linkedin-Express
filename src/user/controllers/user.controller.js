@@ -7,6 +7,7 @@ import experienceModel from "../../experience/model/experiences.model.js";
 import UserSkillModel from "../../experience/model/user-skills.model.js";
 import skillModel from "../../skill/model/skills.model.js";
 import imageModel from "../../image/models/images.model.js";
+import languageModel from "../../languages/models/languages.model.js";
 
 export const getAllUsers = CatchError(async (req, res) => {
   const users = await userModel
@@ -64,8 +65,9 @@ export const signUp = CatchError(async (req, res) => {
 });
 export const signIn = CatchError(async (req, res) => {
   const { email, password } = req.body;
-  const isUser = await userModel.findOne({ where: { email, removed: false } });
-  if (!isUser) throw new AppError("Please Sign-up First", 400);
+  const isUser = await userModel.findOne({ where: { email } });
+  if (!isUser)
+    throw new AppError("User dosn't exist, Please Sign-up first", 400);
   const isPassword = await bcrypt.compare(password, isUser.password);
   if (!isPassword) throw new AppError("Incorrect Password", 400);
   const { id, userName, firstName, lastName, age, role } = isUser;
@@ -162,6 +164,10 @@ export const getProfileInfo = CatchError(async (req, res) => {
         include: [{ model: skillModel, attributes: ["name"] }],
         limit: 1,
       },
+      {
+        model: languageModel,
+        attributes: ["language", "proficiency"],
+      },
     ],
   });
 
@@ -201,4 +207,49 @@ export const activeUser = CatchError(async (req, res) => {
     throw new AppError("Failed to update user status", 500);
   }
   res.status(200).json({ message: "InActive" });
+});
+
+export const getAllLanguages = CatchError(async (req, res) => {
+  const languages = await languageModel.findAll();
+  res.status(200).json(languages);
+});
+
+export const createlanguage = CatchError(async (req, res) => {
+  const { id } = req.user;
+  const islanguage = await languageModel.findOne({
+    where: { language: req.body.language, userId: id },
+  });
+
+  if (islanguage) throw new AppError("Language already exists", 400);
+  req.body.userId = id;
+  const data = await languageModel.create(req.body);
+  if (data)
+    res.status(201).json({ message: "language added successfully", data });
+});
+
+export const updateLanguage = CatchError(async (req, res) => {
+  const { id } = req.user;
+  const language = await languageModel.findOne({
+    where: { language: req.body.language, userId: id },
+  });
+  if (language) throw new AppError("Language already exists", 400);
+
+  const isLanguage = await languageModel.findOne({
+    where: { id: req.params.id, userId: id },
+  });
+  if (!isLanguage) throw new AppError("can't find Language", 404);
+  const data = await languageModel.update(req.body, {
+    where: { id: req.params.id },
+  });
+  res.status(200).json({ message: "updated", data });
+});
+
+export const deleteLanguage = CatchError(async (req, res) => {
+  const { id } = req.user;
+  const isLanguage = await languageModel.findOne({
+    where: { id: req.params.id, userId: id },
+  });
+  if (!isLanguage) throw new AppError("can't find Language", 404);
+  const data = await languageModel.destroy({ where: { id: req.params.id } });
+  res.status(200).json({ message: "deleted", data });
 });

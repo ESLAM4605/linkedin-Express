@@ -22,7 +22,7 @@ app.use("/users", userRouter);
 app.use("/posts", postRouter);
 app.use("/skills", skillRouter);
 app.use("/experiences", experiencesRouter);
-app.use("/education", educationRouter);
+app.use("/educations", educationRouter);
 
 app.all("*", (req, res, next) => {
   throw new AppError("Can't find this route", 400);
