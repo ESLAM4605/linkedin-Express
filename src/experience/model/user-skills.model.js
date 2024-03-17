@@ -5,7 +5,6 @@ import sequelize from "../../../DB/db.connction.js";
 import userModel from "../../user/models/user.model.js";
 import skillModel from "../../skill/model/skills.model.js";
 import experienceModel from "./experiences.model.js";
-import educationModel from "../../education/model/education.model.js";
 
 const UserSkillModel = sequelize.define("user-skills", {
   id: {

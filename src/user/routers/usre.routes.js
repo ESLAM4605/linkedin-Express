@@ -10,6 +10,10 @@ import {
   getProfileInfo,
   disebleUser,
   activeUser,
+  createlanguage,
+  getAllLanguages,
+  updateLanguage,
+  deleteLanguage,
 } from "../controllers/user.controller.js";
 import { authorized, authentecation } from "../../user/auth/auth.js";
 import {
@@ -39,5 +43,12 @@ router
   .route("/active")
   .put(updateInActiveValidation, authentecation, activeUser);
 router.route("/delete").delete(authentecation, deleteUser);
+
+router.route("/languages").get(getAllLanguages);
+router.route("/languages").post(authentecation, createlanguage);
+router
+  .route("/languages/:id")
+  .put(authentecation, updateLanguage)
+  .delete(authentecation, deleteLanguage);
 
 export default router;

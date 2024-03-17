@@ -4,9 +4,6 @@ import UserSkillModel from "../model/user-skills.model.js";
 import skillModel from "../../skill/model/skills.model.js";
 export const getAllExperiences = CatchError(async (req, res) => {
   const experiences = await experienceModel.findAll();
-  if (experiences.length === 0) {
-    throw new AppError("No experiences found", 404);
-  }
   res.status(200).json(experiences);
 });
 
@@ -23,7 +20,7 @@ export const createExperience = CatchError(async (req, res) => {
       skillId: skills,
     },
   });
-
+  // FIXME:
   if (existingSkills.length > 0) {
     const existingSkillNames = existingSkills
       .map((skill) => skill.skillId)
