@@ -14,6 +14,7 @@ import {
   getAllLanguages,
   updateLanguage,
   deleteLanguage,
+  getUserPosts,
 } from "../controllers/user.controller.js";
 import { authorized, authentecation } from "../../user/auth/auth.js";
 import {
@@ -30,6 +31,7 @@ router
   .get(getAllUsers)
   .post(uploadMiddleware, signUpValidation, signUp);
 router.route("/profile").get(getProfileInfo);
+router.route("/userposts").get(getUserPosts);
 router.get("/search", searchForOneUser);
 router
   .route("/update/password")
