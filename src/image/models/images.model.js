@@ -3,17 +3,24 @@ import sequelize from "../../../DB/db.connction.js";
 import { DataTypes } from "sequelize";
 import userModel from "../../user/models/user.model.js";
 
-const imageModel = sequelize.define("Image", {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
+const imageModel = sequelize.define(
+  "Image",
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   },
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-});
+  {
+    paranoid: true,
+    timestamps: true,
+  }
+);
 imageModel.belongsTo(userModel, { foreignKey: "userId", targetKey: "id" });
 userModel.hasMany(imageModel, { foreignKey: "userId" });
 

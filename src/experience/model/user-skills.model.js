@@ -6,13 +6,20 @@ import userModel from "../../user/models/user.model.js";
 import skillModel from "../../skill/model/skills.model.js";
 import experienceModel from "./experiences.model.js";
 
-const UserSkillModel = sequelize.define("user-skills", {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
+const UserSkillModel = sequelize.define(
+  "user-skills",
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
   },
-});
+  {
+    paranoid: true,
+    timestamps: true,
+  }
+);
 
 // Define the association with the User model
 UserSkillModel.belongsTo(userModel, {

@@ -8,13 +8,20 @@ import {
   changePassword,
   searchForOneUser,
   getProfileInfo,
-  disebleUser,
-  activeUser,
   createlanguage,
   getAllLanguages,
   updateLanguage,
   deleteLanguage,
   getUserPosts,
+  createFriendship,
+  getFriendships,
+  rejectRequest,
+  acceptRequest,
+  deleteFriendship,
+  listOfFriends,
+  listOfPendingRecivedRequestes,
+  listOfPendingSentRequestes,
+  getListOfFriends,
 } from "../controllers/user.controller.js";
 import { authorized, authentecation } from "../../user/auth/auth.js";
 import {
@@ -22,9 +29,13 @@ import {
   signUpValidation,
   updateUserValidation,
   changingPasswordVali,
-  updateInActiveValidation,
 } from "../validation/user.validation.js";
 import { uploadMiddleware } from "../../middlewares/uoploadpic.middleware.js";
+import {
+  acceptRequestValidation,
+  createFriendshipValidation,
+  rejectRequestValidation,
+} from "../validation/friendship.validation.js";
 const router = Router();
 router
   .route("/")
@@ -38,12 +49,7 @@ router
   .put(authentecation, changingPasswordVali, changePassword);
 router.route("/signin").post(signInValidation, signIn);
 router.route("/update").put(updateUserValidation, authentecation, updateUser);
-router
-  .route("/inactive")
-  .put(updateInActiveValidation, authentecation, disebleUser);
-router
-  .route("/active")
-  .put(updateInActiveValidation, authentecation, activeUser);
+
 router.route("/delete").delete(authentecation, deleteUser);
 
 router.route("/languages").get(getAllLanguages);
@@ -52,5 +58,26 @@ router
   .route("/languages/:id")
   .put(authentecation, updateLanguage)
   .delete(authentecation, deleteLanguage);
+
+router.route("/addfriend").get(authentecation, getFriendships);
+router
+  .route("/addfriend/:user2Id")
+  .post(createFriendshipValidation, authentecation, createFriendship);
+router
+  .route("/updatefriendship/reject/:id")
+  .put(rejectRequestValidation, authentecation, rejectRequest);
+router
+  .route("/updatefriendship/accept/:id")
+  .put(acceptRequestValidation, authentecation, acceptRequest);
+router.route("/friendship/delete/:id").delete(authentecation, deleteFriendship);
+router.route("/friendslist").get(authentecation, listOfFriends);
+router
+  .route("/pendingrecivedrequestes")
+  .get(authentecation, listOfPendingRecivedRequestes);
+router
+  .route("/pendingsentrequestes")
+  .get(authentecation, listOfPendingSentRequestes);
+
+router.route("/list-of-friends").get(authentecation, getListOfFriends);
 
 export default router;

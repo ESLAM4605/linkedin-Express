@@ -2,26 +2,31 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("Posts", {
+    await queryInterface.createTable("Friendships", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      title: {
-        type: Sequelize.STRING,
+      status: {
+        type: Sequelize.ENUM("pending", "accepted", "rejected"),
         allowNull: false,
+        defaultValue: "pending",
       },
-      content: {
-        type: Sequelize.TEXT,
-        allowNull: false,
-      },
-      userId: {
+      user1Id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: "Users", // Make sure to match the actual table name for the User model
+          model: "Users",
+          key: "id",
+        },
+      },
+      user2Id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: "Users",
           key: "id",
         },
       },
@@ -39,8 +44,7 @@ module.exports = {
       },
     });
   },
-
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("Posts");
+    await queryInterface.dropTable("Friendships");
   },
 };
