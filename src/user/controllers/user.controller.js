@@ -9,13 +9,11 @@ import skillModel from "../../skill/model/skills.model.js";
 import imageModel from "../../image/models/images.model.js";
 import languageModel from "../../languages/models/languages.model.js";
 import postModel from "../../post/models/posts.model.js";
+import friendshipModel from "../models/friendships.model.js";
 
 export const getAllUsers = CatchError(async (req, res) => {
-  const users = await userModel
-    .findAll
-    //{ where: { removed: false } }
-    ();
-  if (users.length === 0) throw new AppError("No users found", 404);
+  const users = await userModel.findAll();
+
   res.status(200).json(users);
 });
 export const searchForOneUser = CatchError(async (req, res) => {
@@ -129,7 +127,7 @@ export const changePassword = CatchError(async (req, res) => {
 export const deleteUser = CatchError(async (req, res) => {
   const { id } = req.user;
 
-  const user = await userModel.findByPk(id, { where: { removed: false } });
+  const user = await userModel.findByPk(id);
   if (!user) throw new AppError("User not found", 404);
 
   const isPost = await postModel.destroy({
@@ -163,7 +161,7 @@ export const deleteUser = CatchError(async (req, res) => {
 
 export const getProfileInfo = CatchError(async (req, res) => {
   const isUser = await userModel.findOne({
-    where: { userName: req.query.userName, removed: false },
+    where: { userName: req.query.userName },
     attributes: { exclude: ["password", "role", "id"] },
     include: [
       {
@@ -221,40 +219,7 @@ export const getUserPosts = CatchError(async (req, res) => {
   res.status(200).json(isUserPosts);
 });
 
-export const disebleUser = CatchError(async (req, res) => {
-  const { userName } = req.query;
-
-  const user = await userModel.findOne({ where: { userName, removed: false } });
-
-  if (!user) throw new AppError("User is already InActive", 404);
-
-  const [updatedRowsCount] = await userModel.update(
-    { removed: true },
-    { where: { id: user.id } }
-  );
-
-  if (updatedRowsCount === 0) {
-    throw new AppError("Failed to update user status", 500);
-  }
-  res.status(200).json({ message: "InActive" });
-});
-
-export const activeUser = CatchError(async (req, res) => {
-  const { userName } = req.query;
-
-  const user = await userModel.findOne({ where: { userName, removed: true } });
-  if (!user) throw new AppError("User is already Active", 404);
-  const updatedRowsCount = await userModel.update(
-    { removed: false },
-    { where: { id: user.id } }
-  );
-
-  if (!updatedRowsCount) {
-    throw new AppError("Failed to update user status", 500);
-  }
-  res.status(200).json({ message: "InActive" });
-});
-
+// Languages
 export const getAllLanguages = CatchError(async (req, res) => {
   const languages = await languageModel.findAll();
   res.status(200).json(languages);
@@ -298,4 +263,174 @@ export const deleteLanguage = CatchError(async (req, res) => {
   if (!isLanguage) throw new AppError("can't find Language", 404);
   const data = await languageModel.destroy({ where: { id: req.params.id } });
   res.status(200).json({ message: "deleted", data });
+});
+
+// Friendships
+export const getFriendships = CatchError(async (req, res) => {
+  const data = await friendshipModel.findAll();
+  res.status(200).json(data);
+});
+
+export const createFriendship = CatchError(async (req, res) => {
+  const { id } = req.user;
+  const user2 = await userModel.findOne({
+    where: { id: req.params.user2Id },
+  });
+  if (!user2) throw new AppError("can't find user", 404);
+
+  if (user2.id === id) throw new AppError("can't add yourself as friend", 400);
+
+  const existingRequest = await friendshipModel.findOne({
+    where: {
+      user1Id: id,
+      user2Id: req.params.user2Id,
+    },
+  });
+
+  if (existingRequest) {
+    throw new AppError("Friend request already sent", 400);
+  }
+
+  const data = await friendshipModel.create({
+    user1Id: id,
+    user2Id: parseInt(req.params.user2Id),
+  });
+  res.status(201).json({ message: "Friend request sent", data });
+});
+
+export const rejectRequest = CatchError(async (req, res) => {
+  const { id: user2Id } = req.user;
+  const findFriendshipreq = await friendshipModel.findOne({
+    where: {
+      user2Id: user2Id,
+      status: "pending",
+      id: req.params.id,
+    },
+  });
+  if (!findFriendshipreq) throw new AppError("can't find request", 404);
+
+  const data = await friendshipModel.update(
+    { status: "rejected" },
+    { where: { id: req.params.id } }
+  );
+
+  res.status(200).json({ message: "Request rejected", data });
+});
+export const acceptRequest = CatchError(async (req, res) => {
+  const { id: user2Id } = req.user;
+  const findFriendshipreq = await friendshipModel.findOne({
+    where: {
+      user2Id: user2Id,
+      status: "pending",
+      id: req.params.id,
+    },
+  });
+  if (!findFriendshipreq) throw new AppError("can't find request", 404);
+
+  const data = await friendshipModel.update(
+    { status: "accepted" },
+    { where: { id: req.params.id } }
+  );
+
+  res.status(200).json({ message: "Request accepted", data });
+});
+
+export const deleteFriendship = CatchError(async (req, res) => {
+  const { id } = req.user;
+  const data = await friendshipModel.destroy({
+    where: { id: req.params.id, user1Id: id, status: "pending" },
+  });
+  if (!data) throw new AppError("can't find friendship request", 404);
+  res.status(200).json({ message: "deleted", data });
+});
+export const listOfFriends = CatchError(async (req, res) => {
+  const { id } = req.user;
+
+  const data = await friendshipModel.findAll({
+    where: { [Op.or]: [{ user1Id: id }, { user2Id: id }], status: "accepted" },
+  });
+  res.status(200).json(data);
+});
+export const listOfPendingRecivedRequestes = CatchError(async (req, res) => {
+  const { id } = req.user;
+  const data = await friendshipModel.findAll({
+    where: { user2Id: id, status: "pending" },
+  });
+  res.status(200).json(data);
+});
+export const listOfPendingSentRequestes = CatchError(async (req, res) => {
+  const { id } = req.user;
+  const data = await friendshipModel.findAll({
+    where: { user1Id: id, status: "pending" },
+  });
+  res.status(200).json(data);
+});
+
+export const getListOfFriends = CatchError(async (req, res) => {
+  const { id } = req.user;
+  const user = await userModel.findOne({
+    where: { id },
+    attributes: {
+      exclude: [
+        "password",
+        "role",
+        "id",
+        "createdAt",
+        "updatedAt",
+        "deletedAt",
+        "About",
+      ],
+    },
+    include: [
+      {
+        model: friendshipModel,
+        as: "User1Friendships",
+        include: [
+          {
+            model: userModel,
+            as: "User2",
+            attributes: {
+              exclude: [
+                "password",
+                "role",
+                "id",
+                "createdAt",
+                "updatedAt",
+                "deletedAt",
+                "About",
+              ],
+            },
+          },
+        ],
+        where: {
+          status: "accepted",
+        },
+      },
+      {
+        model: friendshipModel,
+        as: "User2Friendships",
+        include: [
+          {
+            model: userModel,
+            as: "User1",
+            attributes: {
+              exclude: [
+                "password",
+                "role",
+                "id",
+                "createdAt",
+                "updatedAt",
+                "deletedAt",
+                "About",
+              ],
+            },
+          },
+        ],
+        where: {
+          status: "accepted",
+        },
+      },
+    ],
+  });
+  res.status(200).json({ data: user });
 });
