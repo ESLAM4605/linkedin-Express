@@ -72,7 +72,8 @@ export const signIn = CatchError(async (req, res) => {
   const { id, userName, firstName, lastName, age, role } = isUser;
   const token = Jwt.sign(
     { id, userName, firstName, lastName, age, role },
-    process.env.SECRET_KEY
+    process.env.SECRET_KEY,
+    { expiresIn: "1h" }
   );
   res
     .status(200)
@@ -355,6 +356,7 @@ export const listOfPendingRecivedRequestes = CatchError(async (req, res) => {
   const { id } = req.user;
   const data = await friendshipModel.findAll({
     where: { user2Id: id, status: "pending" },
+    limit: 10,
   });
   res.status(200).json(data);
 });
@@ -362,6 +364,7 @@ export const listOfPendingSentRequestes = CatchError(async (req, res) => {
   const { id } = req.user;
   const data = await friendshipModel.findAll({
     where: { user1Id: id, status: "pending" },
+    limit: 10,
   });
   res.status(200).json(data);
 });
@@ -405,6 +408,7 @@ export const getListOfFriends = CatchError(async (req, res) => {
         where: {
           status: "accepted",
         },
+        limit: 10,
       },
       {
         model: friendshipModel,

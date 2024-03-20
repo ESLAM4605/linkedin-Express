@@ -12,6 +12,7 @@ import skillRouter from "./src/skill/routes/skills.routes.js";
 import experiencesRouter from "./src/experience/routes/experiences.routes.js";
 import educationRouter from "./src/education/routes/education.router.js";
 import { AppError } from "./src/utils/errorhandler.js";
+import reactRouter from "./src/react/router/react.router.js";
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ const app = express();
 app.use(express.json());
 app.use("/users", userRouter);
 app.use("/posts", postRouter);
+app.use(reactRouter);
 app.use("/skills", skillRouter);
 app.use("/experiences", experiencesRouter);
 app.use("/educations", educationRouter);

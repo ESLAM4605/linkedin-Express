@@ -18,6 +18,7 @@ router
   .route("/")
   .get(getAllPosts)
   .post(createPostValidation, authentecation, createPost);
+router.route("/:id").get(getPost);
 router
   .route("/update/:id")
   .put(updatePostValidation, authentecation, updatePost);
