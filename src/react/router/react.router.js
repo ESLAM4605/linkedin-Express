@@ -1,0 +1,34 @@
+import { Router } from "express";
+import {
+  createReactOnPost,
+  deletePostReact,
+  getLastUserReactActivity,
+  getPostReactions,
+} from "../controller/react.controller.js";
+import { authorized, authentecation } from "../../user/auth/auth.js";
+import {
+  createPostReactValidation,
+  getOrDeleteReactsValidation,
+} from "../validation/react.validation.js";
+const router = Router();
+
+router.get(
+  "/posts/:id/reactions",
+  getOrDeleteReactsValidation,
+  getPostReactions
+);
+router.get("/profile/reactions", authentecation, getLastUserReactActivity);
+router.post(
+  "/posts/:id/reactions",
+  createPostReactValidation,
+  authentecation,
+  createReactOnPost
+);
+router.delete(
+  "/posts/:id/reactions",
+  getOrDeleteReactsValidation,
+  authentecation,
+  deletePostReact
+);
+
+export default router;
