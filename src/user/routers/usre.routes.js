@@ -22,6 +22,7 @@ import {
   listOfPendingRecivedRequestes,
   listOfPendingSentRequestes,
   getListOfFriends,
+  getAllPostsOfFriends,
 } from "../controllers/user.controller.js";
 import { authorized, authentecation } from "../../user/auth/auth.js";
 import {
@@ -36,6 +37,7 @@ import {
   createFriendshipValidation,
   rejectRequestValidation,
 } from "../validation/friendship.validation.js";
+
 const router = Router();
 router
   .route("/")
@@ -79,5 +81,7 @@ router
   .get(authentecation, listOfPendingSentRequestes);
 
 router.route("/list-of-friends").get(authentecation, getListOfFriends);
+
+router.route("/posts-of-friends").get(authentecation, getAllPostsOfFriends);
 
 export default router;
