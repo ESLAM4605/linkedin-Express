@@ -22,6 +22,9 @@ import {
   listOfPendingRecivedRequestes,
   listOfPendingSentRequestes,
   getListOfFriends,
+  verfyEmail,
+  resetPassword,
+  forgetPassword,
 } from "../controllers/user.controller.js";
 import { authorized, authentecation } from "../../user/auth/auth.js";
 import {
@@ -79,5 +82,7 @@ router
   .get(authentecation, listOfPendingSentRequestes);
 
 router.route("/list-of-friends").get(authentecation, getListOfFriends);
-
+router.get("/verify/:token", verfyEmail);
+router.post("/reset", forgetPassword);
+router.get("/reset/:token", resetPassword);
 export default router;
