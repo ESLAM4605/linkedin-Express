@@ -10,6 +10,7 @@ import imageModel from "../../image/models/images.model.js";
 import languageModel from "../../languages/models/languages.model.js";
 import postModel from "../../post/models/posts.model.js";
 import friendshipModel from "../models/friendships.model.js";
+import sendmail from "../../utils/email.sender.js";
 
 export const getAllUsers = CatchError(async (req, res) => {
   const users = await userModel.findAll();
@@ -35,6 +36,9 @@ export const signUp = CatchError(async (req, res) => {
     password,
     parseInt(process.env.ROUNDS)
   );
+  const token = Jwt.sign({ email }, process.env.SECRET_KEY, {
+    expiresIn: "10min",
+  });
   const newUser = await userModel.create({
     userName,
     firstName,
@@ -43,7 +47,7 @@ export const signUp = CatchError(async (req, res) => {
     password: hashedPassword,
     age,
   });
-
+  const createLink = `http://localhost:3000/users/verify/${token}`;
   // const img = await imageModel.create({
   //   name: req.file.originalname,
   //   path: req.file.filename,
@@ -54,7 +58,11 @@ export const signUp = CatchError(async (req, res) => {
   //   { profilePicture: img.id },
   //   { where: { id: newUser.id } }
   // );
-
+  const message = await sendmail({
+    to: email,
+    subject: "Verify your account",
+    text: createLink,
+  });
   if (newUser)
     return res.status(201).json({
       message: "Signed Up Successfully",
@@ -62,9 +70,65 @@ export const signUp = CatchError(async (req, res) => {
     });
   throw new AppError("Something went wrong", 500);
 });
+
+export const verfyEmail = CatchError(async (req, res) => {
+  const { token } = req.params;
+  const { email } = Jwt.verify(token, process.env.SECRET_KEY);
+
+  const user = await userModel.findOne({ where: { email } });
+
+  if (!user) throw new AppError("User not found", 404);
+
+  const updatedUser = await userModel.update(
+    { isVerified: true },
+    { where: { email } }
+  );
+
+  if (updatedUser) return res.status(200).json({ message: "Email verified" });
+
+  throw new AppError("Something went wrong", 500);
+});
+
+export const forgetPassword = CatchError(async (req, res) => {
+  const { email } = req.body;
+  const user = await userModel.findOne({ where: { email } });
+  if (!user) throw new AppError("User not found", 404);
+
+  const token = Jwt.sign({ email }, process.env.SECRET_KEY, {
+    expiresIn: "10min",
+  });
+  const forgetPasswordLink = `http://localhost:3000/users/reset/${token}`;
+  const sendmailer = await sendmail({
+    to: email,
+    subject: "Reset your password",
+    text: forgetPasswordLink,
+  });
+  res.status(200).json({ message: "Email sent successfully" });
+});
+
+export const resetPassword = CatchError(async (req, res) => {
+  const { token } = req.params;
+  const { email } = Jwt.verify(token, process.env.SECRET_KEY);
+  const { newPassword } = req.body;
+  const user = await userModel.findOne({ where: { email } });
+  if (!user) throw new AppError("User not found", 404);
+
+  const hashedPassword = await bcrypt.hash(
+    newPassword,
+    parseInt(process.env.ROUNDS)
+  );
+  const updatePassword = await userModel.update(
+    { password: hashedPassword },
+    { where: { email } }
+  );
+  res.status(200).json({ message: "Password reset successfully" });
+});
+
 export const signIn = CatchError(async (req, res) => {
   const { email, password } = req.body;
-  const isUser = await userModel.findOne({ where: { email } });
+  const isUser = await userModel.findOne({
+    where: { email, isVerified: true },
+  });
   if (!isUser)
     throw new AppError("User dosn't exist, Please Sign-up first", 400);
   const isPassword = await bcrypt.compare(password, isUser.password);
@@ -75,9 +139,11 @@ export const signIn = CatchError(async (req, res) => {
     process.env.SECRET_KEY,
     { expiresIn: "1h" }
   );
+
+  //TODO: remove token
   res
     .status(200)
-    .json({ message: `Logged in successfully,Welcome ${userName}`, token });
+    .json({ message: `Logged in successfully,Welcome ${userName}!`, token });
 });
 
 export const updateUser = CatchError(async (req, res) => {

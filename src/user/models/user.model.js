@@ -48,6 +48,10 @@ const userModel = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    isVerified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
   },
   {
     paranoid: true,
