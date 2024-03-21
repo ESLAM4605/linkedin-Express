@@ -25,6 +25,7 @@ import {
   verfyEmail,
   resetPassword,
   forgetPassword,
+  getAllPostsOfFriends,
 } from "../controllers/user.controller.js";
 import { authorized, authentecation } from "../../user/auth/auth.js";
 import {
@@ -39,6 +40,7 @@ import {
   createFriendshipValidation,
   rejectRequestValidation,
 } from "../validation/friendship.validation.js";
+
 const router = Router();
 router
   .route("/")
@@ -85,4 +87,7 @@ router.route("/list-of-friends").get(authentecation, getListOfFriends);
 router.get("/verify/:token", verfyEmail);
 router.post("/reset", forgetPassword);
 router.get("/reset/:token", resetPassword);
+
+router.route("/posts-of-friends").get(authentecation, getAllPostsOfFriends);
+
 export default router;

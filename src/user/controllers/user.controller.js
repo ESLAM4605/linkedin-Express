@@ -11,6 +11,7 @@ import languageModel from "../../languages/models/languages.model.js";
 import postModel from "../../post/models/posts.model.js";
 import friendshipModel from "../models/friendships.model.js";
 import sendmail from "../../utils/email.sender.js";
+import commentModel from "../../post/models/comments.model.js";
 
 export const getAllUsers = CatchError(async (req, res) => {
   const users = await userModel.findAll();
@@ -349,8 +350,11 @@ export const createFriendship = CatchError(async (req, res) => {
 
   const existingRequest = await friendshipModel.findOne({
     where: {
-      user1Id: id,
-      user2Id: req.params.user2Id,
+      [Op.or]: [
+        { user1Id: id, user2Id: req.params.user2Id },
+        { user2Id: id, user1Id: req.params.user2Id },
+      ],
+      status: ["pending", "accepted"],
     },
   });
 
@@ -503,4 +507,95 @@ export const getListOfFriends = CatchError(async (req, res) => {
     ],
   });
   res.status(200).json({ data: user });
+});
+
+// Get All Posts of friends (User Feed)
+export const getAllPostsOfFriends = CatchError(async (req, res) => {
+  const { id } = req.user;
+  const friendsPosts = await userModel.findOne({
+    where: { id },
+    attributes: {
+      exclude: [
+        "password",
+        "role",
+        "createdAt",
+        "updatedAt",
+        "deletedAt",
+        "About",
+      ],
+    },
+    include: [
+      {
+        model: friendshipModel,
+        as: "User1Friendships",
+        attributes: ["id", "status", "user1Id", "user2Id"],
+        include: [
+          {
+            model: userModel,
+            as: "User2",
+            attributes: ["id", "userName"],
+            include: [
+              {
+                model: postModel,
+                as: "Posts",
+                attributes: ["id", "title", "content", "createdAt"],
+                order: [["createdAt", "DESC"]],
+                include: [
+                  {
+                    model: commentModel,
+                    attributes: ["id", "content"],
+                    include: [
+                      {
+                        model: userModel,
+                        attributes: ["id", "userName"],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        where: {
+          status: "accepted",
+        },
+      },
+      {
+        model: friendshipModel,
+        as: "User2Friendships",
+        attributes: ["id", "status", "user1Id", "user2Id"],
+        include: [
+          {
+            model: userModel,
+            as: "User1",
+            attributes: ["id", "userName"],
+            include: [
+              {
+                model: postModel,
+                as: "Posts",
+                attributes: ["id", "title", "content", "createdAt"],
+                order: [["createdAt", "DESC"]],
+                include: [
+                  {
+                    model: commentModel,
+                    attributes: ["id", "content"],
+                    include: [
+                      {
+                        model: userModel,
+                        attributes: ["id", "userName"],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        where: {
+          status: "accepted",
+        },
+      },
+    ],
+  });
+  res.status(200).json(friendsPosts);
 });
