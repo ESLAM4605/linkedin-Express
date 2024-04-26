@@ -31,7 +31,19 @@ export const searchForOneUser = CatchError(async (req, res) => {
 });
 export const signUp = CatchError(async (req, res) => {
   const { userName, firstName, lastName, email, password, age } = req.body;
-  const user = await userModel.findOne({ where: { email } });
+  const user = await userModel.findOne({
+    where: {
+      [Op.or]: [
+        {
+          userName,
+        },
+        {
+          email,
+        },
+      ],
+    },
+  });
+  // const user = await userModel.findOne({ where: { userName } });
   if (user) throw new AppError("User already exists", 400);
   const hashedPassword = await bcrypt.hash(
     password,
@@ -40,6 +52,7 @@ export const signUp = CatchError(async (req, res) => {
   const token = Jwt.sign({ email }, process.env.SECRET_KEY, {
     expiresIn: "10min",
   });
+
   const newUser = await userModel.create({
     userName,
     firstName,
@@ -48,7 +61,7 @@ export const signUp = CatchError(async (req, res) => {
     password: hashedPassword,
     age,
   });
-  const createLink = `http://localhost:3000/users/verify/${token}`;
+  const createLink = `${process.env.BACKEND_URL}/users/verify/${token}`;
   // const img = await imageModel.create({
   //   name: req.file.originalname,
   //   path: req.file.filename,
@@ -98,7 +111,7 @@ export const forgetPassword = CatchError(async (req, res) => {
   const token = Jwt.sign({ email }, process.env.SECRET_KEY, {
     expiresIn: "10min",
   });
-  const forgetPasswordLink = `http://localhost:3000/users/reset/${token}`;
+  const forgetPasswordLink = `${process.env.BACKEND_URL}/users/reset/${token}`;
   const sendmailer = await sendmail({
     to: email,
     subject: "Reset your password",
