@@ -8,6 +8,15 @@ export const getAllPosts = CatchError(async (req, res) => {
   res.status(200).json(posts);
 });
 
+export const getPost = CatchError(async (req, res) => {
+  const post = await postModel.findOne({
+    where: {
+      id: req.params.id,
+    },
+  });
+  res.status(200).json(post);
+});
+
 export const createPost = CatchError(async (req, res) => {
   const { id } = req.user;
   req.body.userID = id;
