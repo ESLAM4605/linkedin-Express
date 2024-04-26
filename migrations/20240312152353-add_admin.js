@@ -11,7 +11,7 @@ module.exports = {
 
     //add admin
     await queryInterface.bulkInsert(
-      "users",
+      "Users",
       [
         {
           userName: "admin",
