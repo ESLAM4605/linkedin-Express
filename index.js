@@ -33,10 +33,20 @@ app.use((error, req, res, next) => {
   const { status, message, stack } = error;
   if (req.file)
     fs.unlinkSync(path.join(__dirname, "uploads", req.file.filename));
-  res.status(status || 500).json({
-    message,
-    stack,
-  });
+
+  let response;
+  if (process.env.ENV === "production") {
+    response = {
+      message: "internal server error",
+    };
+  } else {
+    response = {
+      message,
+      stack,
+    };
+  }
+
+  res.status(status || 500).json(response);
 });
 app.listen(process.env.PORT, () =>
   console.log(`Server running on port ${process.env.PORT}!`)

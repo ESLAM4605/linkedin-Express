@@ -7,7 +7,7 @@ import skillModel from "../../skill/model/skills.model.js";
 import experienceModel from "./experiences.model.js";
 
 const UserSkillModel = sequelize.define(
-  "user-skills",
+  "User-skills",
   {
     id: {
       type: DataTypes.INTEGER,

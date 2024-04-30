@@ -12,7 +12,8 @@ export const validator = (req, schema) => {
   const { error } = schema.validate(ValedateObject, { abortEarly: false });
   if (error) {
     throw new AppError(
-      error.details.map((det) => det.message.split('"').join(""), 400)
+      error.details.map((det) => det.message.split('"').join("")),
+      400
     );
   }
 };
