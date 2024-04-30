@@ -34,8 +34,10 @@ router
 router.route("/delete/:id").delete(authentecation, deletePost);
 
 router
-  .route("/comments/:id")
-  .post(createCommentValidation, authentecation, createComment)
+  .route("/:postId/comments")
+  .post(createCommentValidation, authentecation, createComment);
+router
+  .route("/:postId/comments/:commentId")
   .put(updateCommentValidation, authentecation, updateComment)
   .delete(deleteCommentValidation, authentecation, deleteComment);
 

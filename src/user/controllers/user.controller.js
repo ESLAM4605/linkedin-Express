@@ -62,16 +62,16 @@ export const signUp = CatchError(async (req, res) => {
 
   const createLink = `${process.env.BACKEND_URL}/users/verify/${token}`;
 
-  const img = await imageModel.create({
-    name: req.file.originalname,
-    path: req.file.filename,
-    userId: newUser.id,
-  });
+  // const img = await imageModel.create({
+  //   name: req.file.originalname,
+  //   path: req.file.filename,
+  //   userId: newUser.id,
+  // });
 
-  const updatedUser = await userModel.update(
-    { profilePicture: img.id },
-    { where: { id: newUser.id } }
-  );
+  // const updatedUser = await userModel.update(
+  //   { profilePicture: img.id },
+  //   { where: { id: newUser.id } }
+  // );
   const message = await sendmail({
     to: email,
     subject: "Verify your account",
@@ -265,7 +265,7 @@ export const deleteUser = CatchError(async (req, res) => {
 
   const data = await userModel.destroy({ where: { id } });
 
-  res.status(200).json({ message: "User deleted", data });
+  res.status(200).json({ message: "User deleted", data, user });
 });
 
 export const getProfileInfo = CatchError(async (req, res) => {
