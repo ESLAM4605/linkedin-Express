@@ -47,11 +47,6 @@ export const deletePost = CatchError(async (req, res) => {
   res.status(200).json({ message: "deleted", deletPost });
 });
 
-export const getAllComments = CatchError(async (req, res) => {
-  const comments = await commentModel.findAll();
-  res.status(200).json(comments);
-});
-
 export const createComment = CatchError(async (req, res) => {
   const { id } = req.user;
   const post = await postModel.findOne({

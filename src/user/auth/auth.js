@@ -3,8 +3,8 @@ import { AppError } from "../../utils/errorhandler.js";
 export const authentecation = (req, res, next) => {
   let token = req.header("token");
   if (!token) throw new AppError("UnAuthorized", 401);
-  if (!token.startsWith("bearer__")) throw new AppError("Invalid token", 401);
-  token = token.split("bearer__");
+  if (!token.startsWith("Bearer ")) throw new AppError("Invalid token", 401);
+  token = token.split("Bearer ");
   Jwt.verify(token[1], process.env.SECRET_KEY, (err, decoded) => {
     // err
     if (err) throw new AppError(err.message, 498);
