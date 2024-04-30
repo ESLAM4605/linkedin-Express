@@ -49,14 +49,15 @@ export const deletePost = CatchError(async (req, res) => {
 
 export const createComment = CatchError(async (req, res) => {
   const { id } = req.user;
+
   const post = await postModel.findOne({
-    where: { id: req.params.id },
+    where: { id: req.params.postId },
   });
   if (!post) throw new AppError("can't find Post", 404);
 
   const newComment = await commentModel.create({
     userId: id,
-    postId: parseInt(req.params.id),
+    postId: parseInt(req.params.postId),
     content: req.body.content,
   });
   res.status(201).json({ posted: true, message: newComment });
@@ -64,25 +65,27 @@ export const createComment = CatchError(async (req, res) => {
 
 export const updateComment = CatchError(async (req, res) => {
   const { id } = req.user;
+  const { postId } = req.params;
   const comment = await commentModel.findOne({
-    where: { id: req.params.id, userId: id },
+    where: { id: req.params.commentId, userId: id, postId: postId },
   });
   if (!comment) throw new AppError("can't find this Comment", 404);
 
   const updateComment = await commentModel.update(req.body, {
-    where: { id: req.params.id },
+    where: { id: req.params.commentId },
   });
   res.status(200).json({ message: "updated", updateComment });
 });
 
 export const deleteComment = CatchError(async (req, res) => {
   const { id } = req.user;
+  const { postId } = req.params;
   const comment = await commentModel.findOne({
-    where: { id: req.params.id, userId: id },
+    where: { id: req.params.commentId, userId: id, postId: postId },
   });
   if (!comment) throw new AppError("can't find this Comment", 404);
   const deleteComment = await commentModel.destroy({
-    where: { id: req.params.id },
+    where: { id: req.params.commentId },
   });
   res.status(200).json({ message: "deleted", deleteComment });
 });
