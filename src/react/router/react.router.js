@@ -13,19 +13,20 @@ import {
 const router = Router();
 
 router.get(
-  "/posts/:id/reactions",
+  "/posts/:postId/reactions",
   getOrDeleteReactsValidation,
   getPostReactions
 );
+
 router.get("/profile/reactions", authentecation, getLastUserReactActivity);
 router.post(
-  "/posts/:id/reactions",
+  "/posts/:postId/reactions",
   createPostReactValidation,
   authentecation,
   createReactOnPost
 );
 router.delete(
-  "/posts/:id/reactions",
+  "/posts/:postId/reactions",
   getOrDeleteReactsValidation,
   authentecation,
   deletePostReact

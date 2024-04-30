@@ -7,7 +7,7 @@ import { CatchError, AppError } from "../../utils/errorhandler.js";
 export const getPostReactions = CatchError(async (req, res) => {
   const getPost = await postModel.findOne({
     where: {
-      id: req.params.id,
+      id: req.params.postId,
     },
     attributes: {
       exclude: ["createdAt", "updatedAt", "deletedAt"],
@@ -34,7 +34,7 @@ export const getPostReactions = CatchError(async (req, res) => {
 export const createReactOnPost = CatchError(async (req, res) => {
   const { id } = req.user;
   const { reactionId } = req.body;
-  const getPost = await postModel.findByPk(req.params.id);
+  const getPost = await postModel.findByPk(req.params.postId);
 
   if (!getPost) throw new AppError("No post found", 404);
   const checkForExistReact = await reactPostModel.findOne({
@@ -88,7 +88,7 @@ export const deletePostReact = CatchError(async (req, res) => {
   const deleteReact = await reactPostModel.destroy({
     where: {
       userId: id,
-      postId: req.params.id,
+      postId: req.params.postId,
     },
   });
   if (!deleteReact) throw new AppError("No post found", 404);

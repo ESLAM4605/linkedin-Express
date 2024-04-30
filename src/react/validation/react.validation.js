@@ -4,7 +4,7 @@ import { validator } from "../../utils/validation.middelware.js";
 export const getOrDeleteReactsValidation = (req, res, next) => {
   const schema = Joi.object({
     params: {
-      id: Joi.number().integer().min(1).required(),
+      postId: Joi.number().integer().min(1).required(),
     },
   });
   validator(req, schema);
@@ -17,7 +17,7 @@ export const createPostReactValidation = (req, res, next) => {
       reactionId: Joi.number().integer().min(1).required(),
     },
     params: {
-      id: Joi.number().integer().min(1).required(),
+      postId: Joi.number().integer().min(1).required(),
     },
   });
   validator(req, schema);

@@ -1,8 +1,5 @@
 import educationModel from "../model/education.model.js";
-import userModel from "../../user/models/user.model.js";
-import UserSkillModel from "../../experience/model/user-skills.model.js";
 import { CatchError, AppError } from "../../utils/errorhandler.js";
-import experienceModel from "../../experience/model/experiences.model.js";
 
 export const getAllEducations = CatchError(async (req, res) => {
   const isEducation = await educationModel.findAll();

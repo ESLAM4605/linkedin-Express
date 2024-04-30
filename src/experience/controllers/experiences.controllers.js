@@ -1,7 +1,6 @@
 import { AppError, CatchError } from "../../utils/errorhandler.js";
 import experienceModel from "../model/experiences.model.js";
 import UserSkillModel from "../model/user-skills.model.js";
-import skillModel from "../../skill/model/skills.model.js";
 import sequelize from "../../../DB/db.connction.js";
 export const getAllExperiences = CatchError(async (req, res) => {
   const experiences = await experienceModel.findAll();

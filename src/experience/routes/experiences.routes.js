@@ -16,11 +16,10 @@ import {
 
 const router = Router();
 
-router.route("/").get(getAllExperiences).post(
-  // createExperienceValidation,
-  authentecation,
-  createExperience
-);
+router
+  .route("/")
+  .get(getAllExperiences)
+  .post(createExperienceValidation, authentecation, createExperience);
 router
   .route("/update/:id")
   .put(updateExperienceValidation, authentecation, updateExperience);

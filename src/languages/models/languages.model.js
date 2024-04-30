@@ -1,5 +1,3 @@
-// models/language.model.js
-
 import sequelize from "../../../DB/db.connction.js";
 import { DataTypes } from "sequelize";
 import userModel from "../../user/models/user.model.js";

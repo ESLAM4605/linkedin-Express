@@ -13,11 +13,6 @@ import friendshipModel from "../models/friendships.model.js";
 import sendmail from "../../utils/email.sender.js";
 import commentModel from "../../post/models/comments.model.js";
 
-export const getAllUsers = CatchError(async (req, res) => {
-  const users = await userModel.findAll();
-
-  res.status(200).json(users);
-});
 export const searchForOneUser = CatchError(async (req, res) => {
   const { user } = req.query;
   const users = await userModel.findAll({
@@ -31,15 +26,31 @@ export const searchForOneUser = CatchError(async (req, res) => {
 });
 export const signUp = CatchError(async (req, res) => {
   const { userName, firstName, lastName, email, password, age } = req.body;
-  const user = await userModel.findOne({ where: { email } });
+
+  const user = await userModel.findOne({
+    where: {
+      [Op.or]: [
+        {
+          userName,
+        },
+        {
+          email,
+        },
+      ],
+    },
+  });
+
   if (user) throw new AppError("User already exists", 400);
+
   const hashedPassword = await bcrypt.hash(
     password,
     parseInt(process.env.ROUNDS)
   );
+
   const token = Jwt.sign({ email }, process.env.SECRET_KEY, {
     expiresIn: "10min",
   });
+
   const newUser = await userModel.create({
     userName,
     firstName,
@@ -48,27 +59,31 @@ export const signUp = CatchError(async (req, res) => {
     password: hashedPassword,
     age,
   });
-  const createLink = `http://localhost:3000/users/verify/${token}`;
-  // const img = await imageModel.create({
-  //   name: req.file.originalname,
-  //   path: req.file.filename,
-  //   userId: newUser.id,
-  // });
 
-  // const updatedUser = await userModel.update(
-  //   { profilePicture: img.id },
-  //   { where: { id: newUser.id } }
-  // );
+  const createLink = `${process.env.BACKEND_URL}/users/verify/${token}`;
+
+  const img = await imageModel.create({
+    name: req.file.originalname,
+    path: req.file.filename,
+    userId: newUser.id,
+  });
+
+  const updatedUser = await userModel.update(
+    { profilePicture: img.id },
+    { where: { id: newUser.id } }
+  );
   const message = await sendmail({
     to: email,
     subject: "Verify your account",
-    text: createLink,
+    text: `Please copy the link to Your URL incase it is not Clickble :
+     ${createLink}`,
   });
   if (newUser)
     return res.status(201).json({
       message: "Signed Up Successfully",
-      //updatedUser
+      updatedUser,
     });
+
   throw new AppError("Something went wrong", 500);
 });
 
@@ -93,55 +108,71 @@ export const verfyEmail = CatchError(async (req, res) => {
 export const forgetPassword = CatchError(async (req, res) => {
   const { email } = req.body;
   const user = await userModel.findOne({ where: { email } });
+
   if (!user) throw new AppError("User not found", 404);
 
   const token = Jwt.sign({ email }, process.env.SECRET_KEY, {
     expiresIn: "10min",
   });
-  const forgetPasswordLink = `http://localhost:3000/users/reset/${token}`;
+
+  const forgetPasswordLink = `${process.env.BACKEND_URL}/users/reset/${token}`;
+
   const sendmailer = await sendmail({
     to: email,
     subject: "Reset your password",
-    text: forgetPasswordLink,
+    text: `Please copy the link to Your URL incase it is not Clickble :
+     ${forgetPasswordLink}`,
   });
+
   res.status(200).json({ message: "Email sent successfully" });
 });
 
 export const resetPassword = CatchError(async (req, res) => {
   const { token } = req.params;
+
   const { email } = Jwt.verify(token, process.env.SECRET_KEY);
+
   const { newPassword } = req.body;
+
   const user = await userModel.findOne({ where: { email } });
+
   if (!user) throw new AppError("User not found", 404);
 
   const hashedPassword = await bcrypt.hash(
     newPassword,
     parseInt(process.env.ROUNDS)
   );
+
   const updatePassword = await userModel.update(
     { password: hashedPassword },
     { where: { email } }
   );
+
   res.status(200).json({ message: "Password reset successfully" });
 });
 
 export const signIn = CatchError(async (req, res) => {
   const { email, password } = req.body;
+
   const isUser = await userModel.findOne({
-    where: { email, isVerified: true },
+    where: { email },
   });
+
   if (!isUser)
     throw new AppError("User dosn't exist, Please Sign-up first", 400);
+
   const isPassword = await bcrypt.compare(password, isUser.password);
+
   if (!isPassword) throw new AppError("Incorrect Password", 400);
+
   const { id, userName, firstName, lastName, age, role } = isUser;
+
   const token = Jwt.sign(
     { id, userName, firstName, lastName, age, role },
     process.env.SECRET_KEY,
     { expiresIn: "1h" }
   );
 
-  //TODO: remove token
   res
     .status(200)
     .json({ message: `Logged in successfully,Welcome ${userName}!`, token });
@@ -149,9 +180,12 @@ export const signIn = CatchError(async (req, res) => {
 
 export const updateUser = CatchError(async (req, res) => {
   const { id } = req.user;
+
   const { userName, firstName, lastName, email, role, age, About } = req.body;
+
   const user = await userModel.findByPk(id, { where: { removed: false } });
   if (!user) throw new AppError("User not found", 404);
+
   const data = await userModel.update(
     {
       userName,
@@ -169,26 +203,35 @@ export const updateUser = CatchError(async (req, res) => {
     },
     { new: true }
   );
+
   res.status(200).json({ message: "User updated", data });
 });
 
 export const changePassword = CatchError(async (req, res) => {
   const { oldPassword, newPassword, confirmPassword } = req.body;
+
   if (newPassword !== confirmPassword)
     throw new AppError("Passwords do not match", 400);
+
   if (newPassword === oldPassword)
     throw new AppError("Old password cannot be the same as new password", 400);
+
   const { id } = req.user;
   const isUser = await userModel.findByPk(id, { where: { removed: false } });
   if (!isUser) throw new AppError("User not found", 404);
+
   const isPassword = await bcrypt.compare(oldPassword, isUser.password);
   if (isPassword === false) throw new AppError("Incorrect Password", 400);
+
   const hashingNewPassword = await bcrypt.hash(newPassword, 10);
+
   const changingPassword = await userModel.update(
     { password: hashingNewPassword },
     { where: { id } }
   );
+
   if (!changingPassword) throw new AppError("Something went wrong", 500);
+
   res.status(200).json({ message: "Password changed" });
 });
 

@@ -1,7 +1,6 @@
 import { Router } from "express";
 import {
   signUp,
-  getAllUsers,
   signIn,
   updateUser,
   deleteUser,
@@ -42,10 +41,7 @@ import {
 } from "../validation/friendship.validation.js";
 
 const router = Router();
-router
-  .route("/")
-  .get(getAllUsers)
-  .post(uploadMiddleware, signUpValidation, signUp);
+router.route("/").post(uploadMiddleware, signUpValidation, signUp);
 router.route("/profile").get(getProfileInfo);
 router.route("/userposts").get(getUserPosts);
 router.get("/search", searchForOneUser);
