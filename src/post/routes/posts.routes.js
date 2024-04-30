@@ -5,7 +5,6 @@ import {
   createPost,
   updatePost,
   deletePost,
-  getAllComments,
   createComment,
   updateComment,
   deleteComment,
@@ -34,7 +33,6 @@ router
   .put(updatePostValidation, authentecation, updatePost);
 router.route("/delete/:id").delete(authentecation, deletePost);
 
-router.route("/comments").get(getAllComments);
 router
   .route("/comments/:id")
   .post(createCommentValidation, authentecation, createComment)
