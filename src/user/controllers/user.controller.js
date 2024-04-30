@@ -114,9 +114,7 @@ export const forgetPassword = CatchError(async (req, res) => {
   const token = Jwt.sign({ email }, process.env.SECRET_KEY, {
     expiresIn: "10min",
   });
-
   const forgetPasswordLink = `${process.env.BACKEND_URL}/users/reset/${token}`;
-
   const sendmailer = await sendmail({
     to: email,
     subject: "Reset your password",
