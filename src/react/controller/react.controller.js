@@ -34,20 +34,22 @@ export const getPostReactions = CatchError(async (req, res) => {
 export const createReactOnPost = CatchError(async (req, res) => {
   const { id } = req.user;
   const { reactionId } = req.body;
+
   const getPost = await postModel.findByPk(req.params.postId);
 
   if (!getPost) throw new AppError("No post found", 404);
   const checkForExistReact = await reactPostModel.findOne({
     where: {
       userId: id,
-      postId: req.params.id,
+      postId: req.params.postId,
     },
   });
+
   if (checkForExistReact)
     await reactPostModel.destroy({
       where: {
         userId: id,
-        postId: req.params.id,
+        postId: req.params.postId,
       },
     });
 
@@ -56,6 +58,7 @@ export const createReactOnPost = CatchError(async (req, res) => {
     postId: getPost.id,
     userId: id,
   });
+
   if (!createReact)
     throw new AppError("Can't make a reaction please Sign-in first", 400);
   res.status(201).json({ created: true, message: createReact });
