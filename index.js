@@ -43,7 +43,7 @@ app.use((error, req, res, next) => {
         ? "Internal Server Error"
         : error.message;
 
-    console.error({ message: error.message, stack: error.stack });
+    console.error({ message: error.message, stack: error.stack, error });
     return res.status(500).json({
       message,
     });

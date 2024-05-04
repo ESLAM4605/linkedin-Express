@@ -42,7 +42,7 @@ import {
 
 const router = Router();
 router.route("/").post(uploadMiddleware, signUpValidation, signUp);
-router.route("/profile").get(getProfileInfo);
+router.route("/profile").get(authentecation, getProfileInfo);
 router.route("/userposts").get(getUserPosts);
 router.get("/search", searchForOneUser);
 router

@@ -62,16 +62,16 @@ export const signUp = CatchError(async (req, res) => {
 
   const createLink = `${process.env.BACKEND_URL}/users/verify/${token}`;
 
-  // const img = await imageModel.create({
-  //   name: req.file.originalname,
-  //   path: req.file.filename,
-  //   userId: newUser.id,
-  // });
+  const img = await imageModel.create({
+    name: req.file.originalname,
+    path: req.file.filename,
+    userId: newUser.id,
+  });
 
-  // const updatedUser = await userModel.update(
-  //   { profilePicture: img.id },
-  //   { where: { id: newUser.id } }
-  // );
+  const updatedUser = await userModel.update(
+    { profilePicture: img.id },
+    { where: { id: newUser.id } }
+  );
   const message = await sendmail({
     to: email,
     subject: "Verify your account",
@@ -179,18 +179,22 @@ export const signIn = CatchError(async (req, res) => {
 export const updateUser = CatchError(async (req, res) => {
   const { id } = req.user;
 
-  const { userName, firstName, lastName, email, role, age, About } = req.body;
+  const { userName, firstName, lastName, age, About } = req.body;
 
   const user = await userModel.findByPk(id, { where: { removed: false } });
+
   if (!user) throw new AppError("User not found", 404);
+
+  const checkEmail = await userModel.findOne({ where: { userName } });
+
+  if (checkEmail && checkEmail.id !== id)
+    throw new AppError("user already exist", 400);
 
   const data = await userModel.update(
     {
       userName,
       firstName,
       lastName,
-      email,
-      role,
       age,
       About,
     },
@@ -265,7 +269,7 @@ export const deleteUser = CatchError(async (req, res) => {
 
   const data = await userModel.destroy({ where: { id } });
 
-  res.status(200).json({ message: "User deleted", data, user });
+  res.status(200).json({ message: "User deleted", data });
 });
 
 export const getProfileInfo = CatchError(async (req, res) => {
