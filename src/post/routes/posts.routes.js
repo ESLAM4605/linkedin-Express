@@ -1,7 +1,6 @@
 import { Router } from "express";
 import {
   getPost,
-  getAllPosts,
   createPost,
   updatePost,
   deletePost,
@@ -23,10 +22,7 @@ import {
 
 const router = Router();
 
-router
-  .route("/")
-  .get(getAllPosts)
-  .post(createPostValidation, authentecation, createPost);
+router.route("/").post(createPostValidation, authentecation, createPost);
 router.route("/:id").get(getPost);
 router
   .route("/update/:id")

@@ -3,11 +3,6 @@ import { AppError, CatchError } from "../../utils/errorhandler.js";
 import commentModel from "../models/comments.model.js";
 import userModel from "../../user/models/user.model.js";
 
-export const getAllPosts = CatchError(async (req, res) => {
-  const posts = await postModel.findAll();
-  res.status(200).json(posts);
-});
-
 export const getPost = CatchError(async (req, res) => {
   const post = await postModel.findOne({
     where: {

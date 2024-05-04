@@ -17,7 +17,15 @@ export const createExperience = CatchError(async (req, res) => {
   otherFields.userId = userId;
 
   const transaction = await sequelize.transaction();
-
+  const findExperience = await experienceModel.findOne({
+    where: {
+      userId,
+      title: otherFields.title,
+    },
+  });
+  if (findExperience) {
+    throw new AppError("Experience already exists", 400);
+  }
   try {
     const experience = await experienceModel.create(req.body, {
       transaction: transaction,
@@ -28,11 +36,9 @@ export const createExperience = CatchError(async (req, res) => {
       experienceId: experience.id,
       skillId: skill,
     }));
-
-    // Bulk create userSkills within the transaction
+    // add experience to user skills table that he learned in the job
     await UserSkillModel.bulkCreate(userSkills, { transaction: transaction });
 
-    // If all operations are successful, commit the transaction
     await transaction.commit();
 
     res.status(201).json({ message: "Added Successfully", experience });

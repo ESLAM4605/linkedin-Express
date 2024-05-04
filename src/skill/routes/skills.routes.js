@@ -17,7 +17,7 @@ const router = Router();
 
 router
   .route("/")
-  .get(getAllSkills)
+  .get(authentecation, authorized("admin"), getAllSkills)
   .post(
     createSkillValidation,
     authentecation,

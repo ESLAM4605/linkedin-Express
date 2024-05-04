@@ -318,8 +318,7 @@ export const getUserPosts = CatchError(async (req, res) => {
   const isUserPosts = await userModel.findOne({
     where: {
       userName: req.query.userName,
-      //TODO:
-      // removed: false
+      removed: false,
     },
     attributes: { exclude: ["password", "role", "id"] },
     include: [
@@ -434,6 +433,7 @@ export const rejectRequest = CatchError(async (req, res) => {
 });
 export const acceptRequest = CatchError(async (req, res) => {
   const { id: user2Id } = req.user;
+
   const findFriendshipreq = await friendshipModel.findOne({
     where: {
       user2Id: user2Id,
@@ -441,6 +441,7 @@ export const acceptRequest = CatchError(async (req, res) => {
       id: req.params.id,
     },
   });
+
   if (!findFriendshipreq) throw new AppError("can't find request", 404);
 
   const data = await friendshipModel.update(
@@ -557,6 +558,7 @@ export const getListOfFriends = CatchError(async (req, res) => {
 // Get All Posts of friends (User Feed)
 export const getAllPostsOfFriends = CatchError(async (req, res) => {
   const { id } = req.user;
+  console.log(id);
   const friendsPosts = await userModel.findOne({
     where: { id },
     attributes: {
