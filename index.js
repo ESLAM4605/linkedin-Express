@@ -30,23 +30,24 @@ app.all("*", (req, res, next) => {
   throw new AppError("Can't find this route", 400);
 });
 app.use((error, req, res, next) => {
-  const { status, message, stack } = error;
   if (req.file)
     fs.unlinkSync(path.join(__dirname, "uploads", req.file.filename));
 
-  let response;
-  if (process.env.ENV === "production") {
-    response = {
-      message: "internal server error",
-    };
+  if (error instanceof AppError) {
+    return res.status(error.status).json({
+      message: error.message,
+    });
   } else {
-    response = {
-      message,
-      stack,
-    };
-  }
+    const message =
+      process.env.ENV === "production"
+        ? "Internal Server Error"
+        : error.message;
 
-  res.status(status || 500).json(response);
+    console.error({ message: error.message, stack: error.stack });
+    return res.status(500).json({
+      message,
+    });
+  }
 });
 app.listen(process.env.PORT, () =>
   console.log(`Server running on port ${process.env.PORT}!`)
