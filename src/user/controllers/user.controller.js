@@ -275,7 +275,15 @@ export const deleteUser = CatchError(async (req, res) => {
 export const getProfileInfo = CatchError(async (req, res) => {
   const isUser = await userModel.findOne({
     where: { userName: req.query.userName },
-    attributes: { exclude: ["password", "role", "id"] },
+    attributes: [
+      "userName",
+      "firstName",
+      "lastName",
+      "profilePicture",
+      "age",
+      "email",
+      "About",
+    ],
     include: [
       {
         model: experienceModel,
@@ -295,7 +303,6 @@ export const getProfileInfo = CatchError(async (req, res) => {
           "endDate",
           "description",
         ],
-        limit: 1,
       },
       {
         model: UserSkillModel,
@@ -309,7 +316,6 @@ export const getProfileInfo = CatchError(async (req, res) => {
       },
     ],
   });
-
   if (!isUser) throw new AppError("User not found", 404);
   res.status(200).json(isUser);
 });
@@ -332,13 +338,10 @@ export const getUserPosts = CatchError(async (req, res) => {
 });
 
 // Languages
-export const getAllLanguages = CatchError(async (req, res) => {
-  const languages = await languageModel.findAll();
-  res.status(200).json(languages);
-});
 
 export const createlanguage = CatchError(async (req, res) => {
   const { id } = req.user;
+
   const islanguage = await languageModel.findOne({
     where: { language: req.body.language, userId: id },
   });
@@ -352,27 +355,40 @@ export const createlanguage = CatchError(async (req, res) => {
 
 export const updateLanguage = CatchError(async (req, res) => {
   const { id } = req.user;
+
+  if (parseInt(req.params.userId) !== id)
+    throw new AppError("can't update other user's language", 400);
+
   const language = await languageModel.findOne({
     where: { language: req.body.language, userId: id },
   });
+
   if (language) throw new AppError("Language already exists", 400);
 
   const isExistLanguage = await languageModel.findOne({
     where: { id: req.params.id, userId: id },
   });
+
   if (!isExistLanguage) throw new AppError("can't find Language", 404);
   const data = await languageModel.update(req.body, {
     where: { id: req.params.id },
   });
+
   res.status(200).json({ message: "updated", data });
 });
 
 export const deleteLanguage = CatchError(async (req, res) => {
   const { id } = req.user;
+
+  if (parseInt(req.params.userId) !== id)
+    throw new AppError("can't delete other user's language", 400);
+
   const isLanguage = await languageModel.findOne({
     where: { id: req.params.id, userId: id },
   });
+
   if (!isLanguage) throw new AppError("can't find Language", 404);
+
   const data = await languageModel.destroy({ where: { id: req.params.id } });
   res.status(200).json({ message: "deleted", data });
 });

@@ -8,7 +8,6 @@ import {
   searchForOneUser,
   getProfileInfo,
   createlanguage,
-  getAllLanguages,
   updateLanguage,
   deleteLanguage,
   getUserPosts,
@@ -53,10 +52,9 @@ router.route("/update").put(updateUserValidation, authentecation, updateUser);
 
 router.route("/delete").delete(authentecation, deleteUser);
 
-router.route("/languages").get(getAllLanguages);
-router.route("/languages").post(authentecation, createlanguage);
+router.route("/:userId/languages").post(authentecation, createlanguage);
 router
-  .route("/languages/:id")
+  .route("/:userId/languages/:id")
   .put(authentecation, updateLanguage)
   .delete(authentecation, deleteLanguage);
 
