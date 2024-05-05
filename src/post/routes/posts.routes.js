@@ -37,6 +37,8 @@ router
   .put(updateCommentValidation, authentecation, updateComment)
   .delete(deleteCommentValidation, authentecation, deleteComment);
 
-router.route("/commentsofpost/:id").get(authentecation, getAllCommentsOnPost);
+router
+  .route("/:postId/commentsofpost")
+  .get(authentecation, getAllCommentsOnPost);
 
 export default router;

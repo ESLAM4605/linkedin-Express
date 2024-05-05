@@ -12,7 +12,6 @@ import {
   deleteLanguage,
   getUserPosts,
   createFriendship,
-  getFriendships,
   rejectRequest,
   acceptRequest,
   deleteFriendship,
@@ -58,7 +57,6 @@ router
   .put(authentecation, updateLanguage)
   .delete(authentecation, deleteLanguage);
 
-router.route("/addfriend").get(authentecation, getFriendships);
 router
   .route("/addfriend/:user2Id")
   .post(createFriendshipValidation, authentecation, createFriendship);

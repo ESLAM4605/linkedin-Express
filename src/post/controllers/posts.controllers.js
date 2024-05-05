@@ -48,6 +48,7 @@ export const createComment = CatchError(async (req, res) => {
   const post = await postModel.findOne({
     where: { id: req.params.postId },
   });
+
   if (!post) throw new AppError("can't find Post", 404);
 
   const newComment = await commentModel.create({
@@ -55,20 +56,26 @@ export const createComment = CatchError(async (req, res) => {
     postId: parseInt(req.params.postId),
     content: req.body.content,
   });
+
+  if (!newComment) throw new AppError("can't create empty comment", 400);
+
   res.status(201).json({ posted: true, message: newComment });
 });
 
 export const updateComment = CatchError(async (req, res) => {
   const { id } = req.user;
   const { postId } = req.params;
+
   const comment = await commentModel.findOne({
     where: { id: req.params.commentId, userId: id, postId: postId },
   });
+
   if (!comment) throw new AppError("can't find this Comment", 404);
 
   const updateComment = await commentModel.update(req.body, {
     where: { id: req.params.commentId },
   });
+
   res.status(200).json({ message: "updated", updateComment });
 });
 
@@ -88,17 +95,17 @@ export const deleteComment = CatchError(async (req, res) => {
 export const getAllCommentsOnPost = CatchError(async (req, res, next) => {
   const comments = await postModel.findAll({
     where: {
-      id: req.params.id,
+      id: req.params.postId,
     },
     attributes: ["id", "title", "content"],
     include: [
       {
         model: commentModel,
-        attributes: ["id", "content"],
+        attributes: ["id", "content", "createdAt", "updatedAt"],
         include: [
           {
             model: userModel,
-            attributes: ["id", "userName"],
+            attributes: ["id", "userName", "profilePicture"],
           },
         ],
       },

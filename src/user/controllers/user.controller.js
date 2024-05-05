@@ -394,10 +394,6 @@ export const deleteLanguage = CatchError(async (req, res) => {
 });
 
 // Friendships
-export const getFriendships = CatchError(async (req, res) => {
-  const data = await friendshipModel.findAll();
-  res.status(200).json(data);
-});
 
 export const createFriendship = CatchError(async (req, res) => {
   const { id } = req.user;
@@ -470,10 +466,13 @@ export const acceptRequest = CatchError(async (req, res) => {
 
 export const deleteFriendship = CatchError(async (req, res) => {
   const { id } = req.user;
+
   const data = await friendshipModel.destroy({
     where: { id: req.params.id, user1Id: id, status: "pending" },
   });
+
   if (!data) throw new AppError("can't find friendship request", 404);
+
   res.status(200).json({ message: "deleted", data });
 });
 export const listOfFriends = CatchError(async (req, res) => {
@@ -482,14 +481,16 @@ export const listOfFriends = CatchError(async (req, res) => {
   const data = await friendshipModel.findAll({
     where: { [Op.or]: [{ user1Id: id }, { user2Id: id }], status: "accepted" },
   });
+
   res.status(200).json(data);
 });
 export const listOfPendingRecivedRequestes = CatchError(async (req, res) => {
   const { id } = req.user;
+
   const data = await friendshipModel.findAll({
     where: { user2Id: id, status: "pending" },
-    limit: 10,
   });
+
   res.status(200).json(data);
 });
 export const listOfPendingSentRequestes = CatchError(async (req, res) => {
@@ -503,19 +504,10 @@ export const listOfPendingSentRequestes = CatchError(async (req, res) => {
 
 export const getListOfFriends = CatchError(async (req, res) => {
   const { id } = req.user;
+
   const user = await userModel.findOne({
     where: { id },
-    attributes: {
-      exclude: [
-        "password",
-        "role",
-        "id",
-        "createdAt",
-        "updatedAt",
-        "deletedAt",
-        "About",
-      ],
-    },
+    attributes: ["firstName", "lastName", "profilePicture"],
     include: [
       {
         model: friendshipModel,
@@ -524,17 +516,7 @@ export const getListOfFriends = CatchError(async (req, res) => {
           {
             model: userModel,
             as: "User2",
-            attributes: {
-              exclude: [
-                "password",
-                "role",
-                "id",
-                "createdAt",
-                "updatedAt",
-                "deletedAt",
-                "About",
-              ],
-            },
+            attributes: ["firstName", "lastName", "profilePicture"],
           },
         ],
         where: {
@@ -549,17 +531,7 @@ export const getListOfFriends = CatchError(async (req, res) => {
           {
             model: userModel,
             as: "User1",
-            attributes: {
-              exclude: [
-                "password",
-                "role",
-                "id",
-                "createdAt",
-                "updatedAt",
-                "deletedAt",
-                "About",
-              ],
-            },
+            attributes: ["firstName", "lastName", "profilePicture"],
           },
         ],
         where: {
@@ -574,91 +546,53 @@ export const getListOfFriends = CatchError(async (req, res) => {
 // Get All Posts of friends (User Feed)
 export const getAllPostsOfFriends = CatchError(async (req, res) => {
   const { id } = req.user;
-  console.log(id);
-  const friendsPosts = await userModel.findOne({
-    where: { id },
-    attributes: {
-      exclude: [
-        "password",
-        "role",
-        "createdAt",
-        "updatedAt",
-        "deletedAt",
-        "About",
-      ],
+
+  const friendsPsts = await userModel.findAll({
+    where: {
+      id,
     },
+    attributes: ["userName", "profilePicture"],
     include: [
       {
         model: friendshipModel,
         as: "User1Friendships",
-        attributes: ["id", "status", "user1Id", "user2Id"],
+        attributes: ["user1Id", "user2Id"],
         include: [
           {
             model: userModel,
             as: "User2",
-            attributes: ["id", "userName"],
+            attributes: ["id", "userName", "profilePicture"],
             include: [
               {
                 model: postModel,
                 as: "Posts",
-                attributes: ["id", "title", "content", "createdAt"],
-                order: [["createdAt", "DESC"]],
-                include: [
-                  {
-                    model: commentModel,
-                    attributes: ["id", "content"],
-                    include: [
-                      {
-                        model: userModel,
-                        attributes: ["id", "userName"],
-                      },
-                    ],
-                  },
-                ],
+                attributes: ["title", "content", "createdAt", "updatedAt"],
               },
             ],
           },
         ],
-        where: {
-          status: "accepted",
-        },
       },
       {
         model: friendshipModel,
         as: "User2Friendships",
-        attributes: ["id", "status", "user1Id", "user2Id"],
+        attributes: ["user1Id", "user2Id"],
         include: [
           {
             model: userModel,
             as: "User1",
-            attributes: ["id", "userName"],
+            attributes: ["id", "userName", "profilePicture"],
             include: [
               {
                 model: postModel,
                 as: "Posts",
-                attributes: ["id", "title", "content", "createdAt"],
-                order: [["createdAt", "DESC"]],
-                include: [
-                  {
-                    model: commentModel,
-                    attributes: ["id", "content"],
-                    include: [
-                      {
-                        model: userModel,
-                        attributes: ["id", "userName"],
-                      },
-                    ],
-                  },
-                ],
+                attributes: ["title", "content", "createdAt", "updatedAt"],
               },
             ],
           },
         ],
-        where: {
-          status: "accepted",
-        },
       },
     ],
   });
-  res.status(200).json(friendsPosts);
+
+  res.status(200).json(friendsPsts);
 });
