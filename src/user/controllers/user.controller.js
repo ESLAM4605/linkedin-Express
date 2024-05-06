@@ -62,16 +62,19 @@ export const signUp = CatchError(async (req, res) => {
 
   const createLink = `${process.env.BACKEND_URL}/users/verify/${token}`;
 
-  const img = await imageModel.create({
-    name: req.file.originalname,
-    path: req.file.filename,
-    userId: newUser.id,
-  });
+  if (req.file) {
+    const img = await imageModel.create({
+      name: req.file.originalname,
+      path: req.file.filename,
+      userId: newUser.id,
+    });
 
-  const updatedUser = await userModel.update(
-    { profilePicture: img.id },
-    { where: { id: newUser.id } }
-  );
+    const updatedUser = await userModel.update(
+      { profilePicture: img.id },
+      { where: { id: newUser.id } }
+    );
+  }
+
   const message = await sendmail({
     to: email,
     subject: "Verify your account",
@@ -81,7 +84,7 @@ export const signUp = CatchError(async (req, res) => {
   if (newUser)
     return res.status(201).json({
       message: "Signed Up Successfully",
-      updatedUser,
+      // updatedUser,
     });
 
   throw new AppError("Something went wrong", 500);
@@ -168,12 +171,45 @@ export const signIn = CatchError(async (req, res) => {
   const token = Jwt.sign(
     { id, userName, firstName, lastName, age, role },
     process.env.SECRET_KEY,
-    { expiresIn: "1h" }
+    { expiresIn: "15min" }
+  );
+  const refreshToken = Jwt.sign(
+    { id, userName, firstName, lastName, age, role, isRefresh: true },
+    process.env.SECRET_KEY,
+    { expiresIn: "1y" }
   );
 
-  res
-    .status(200)
-    .json({ message: `Logged in successfully,Welcome ${userName}!`, token });
+  res.status(200).json({
+    message: `Logged in successfully,Welcome ${userName}!`,
+    token,
+    refreshToken,
+  });
+});
+
+export const refreshToken = CatchError(async (req, res) => {
+  const refreshToken = req.header("refreshToken");
+  const decoded = Jwt.verify(refreshToken, process.env.SECRET_KEY);
+
+  // Insure that the user send a refresh token
+  if (!decoded.isRefresh) throw new AppError("Invalid token", 401);
+
+  const user = await userModel.findOne({ email: decoded.email });
+
+  if (!user) throw new AppError("User not found", 404);
+
+  const regularToken = Jwt.sign(
+    {
+      id: decoded.id,
+      userName: decoded.userName,
+      firstName: decoded.firstName,
+      lastName: decoded.lastName,
+      age: decoded.age,
+      role: decoded.role,
+    },
+    process.env.SECRET_KEY,
+    { expiresIn: "15min" }
+  );
+  res.json({ meesage: "Refreshed successfully", regularToken: regularToken });
 });
 
 export const updateUser = CatchError(async (req, res) => {

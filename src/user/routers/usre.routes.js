@@ -23,6 +23,7 @@ import {
   resetPassword,
   forgetPassword,
   getAllPostsOfFriends,
+  refreshToken,
 } from "../controllers/user.controller.js";
 import { authorized, authentecation } from "../../user/auth/auth.js";
 import {
@@ -40,6 +41,7 @@ import {
 
 const router = Router();
 router.route("/").post(uploadMiddleware, signUpValidation, signUp);
+
 router.route("/profile").get(authentecation, getProfileInfo);
 router.route("/userposts").get(getUserPosts);
 router.get("/search", searchForOneUser);
@@ -81,5 +83,7 @@ router.post("/reset", forgetPassword);
 router.get("/reset/:token", resetPassword);
 
 router.route("/posts-of-friends").get(authentecation, getAllPostsOfFriends);
+
+router.route("/refresh-token").post(refreshToken);
 
 export default router;
