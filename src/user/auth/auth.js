@@ -8,6 +8,8 @@ export const authentecation = (req, res, next) => {
   Jwt.verify(token[1], process.env.SECRET_KEY, (err, decoded) => {
     // err
     if (err) throw new AppError(err.message, 498);
+
+    if (decoded.isRefresh) throw new AppError("Invalid token", 401);
     // decoded undefined
     req.user = decoded;
   });
