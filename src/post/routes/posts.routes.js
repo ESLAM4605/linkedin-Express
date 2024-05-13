@@ -8,6 +8,7 @@ import {
   updateComment,
   deleteComment,
   getAllCommentsOnPost,
+  getPostsWorldFeed,
 } from "../controllers/posts.controllers.js";
 import { authorized, authentecation } from "../../user/auth/auth.js";
 import {
@@ -22,6 +23,7 @@ import {
 
 const router = Router();
 
+router.route("/world-feed").get(getPostsWorldFeed);
 router.route("/").post(createPostValidation, authentecation, createPost);
 router.route("/:id").get(getPost);
 router
