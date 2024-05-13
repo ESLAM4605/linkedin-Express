@@ -2,8 +2,10 @@ import postModel from "../models/posts.model.js";
 import { AppError, CatchError } from "../../utils/errorhandler.js";
 import commentModel from "../models/comments.model.js";
 import userModel from "../../user/models/user.model.js";
+import redis, { addPostToRedis, getPostsFromRedis } from "../../Redis/redis.js";
 
 export const getPost = CatchError(async (req, res) => {
+  console.log(req.params.id);
   const post = await postModel.findOne({
     where: {
       id: req.params.id,
@@ -16,6 +18,7 @@ export const createPost = CatchError(async (req, res) => {
   const { id } = req.user;
   req.body.userID = id;
   const createPost = await postModel.create(req.body);
+  await addPostToRedis(createPost);
   res.status(201).json({ posted: true, message: createPost });
 });
 
@@ -112,4 +115,11 @@ export const getAllCommentsOnPost = CatchError(async (req, res, next) => {
     ],
   });
   res.status(200).json(comments);
+});
+
+export const getPostsWorldFeed = CatchError(async (req, res) => {
+  const { offset, limit = 10 } = req.query;
+  const posts = await getPostsFromRedis(+offset, limit);
+
+  res.json(posts);
 });
