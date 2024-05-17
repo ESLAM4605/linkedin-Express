@@ -171,7 +171,7 @@ export const signIn = CatchError(async (req, res) => {
   const token = Jwt.sign(
     { id, userName, firstName, lastName, age, role },
     process.env.SECRET_KEY,
-    { expiresIn: "15min" }
+    { expiresIn: "15d" }
   );
   const refreshToken = Jwt.sign(
     { id, userName, firstName, lastName, age, role, isRefresh: true },
