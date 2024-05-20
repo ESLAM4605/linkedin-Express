@@ -1,9 +1,9 @@
-import Joi from "joi";
+import Joi from "../../middlewares/joi.extend.js";
 import { validator } from "../../utils/validation.middelware.js";
 export const createCommentValidation = (req, res, next) => {
   const schema = Joi.object({
     body: {
-      content: Joi.string().min(1).max(200).required(),
+      content: Joi.string().min(1).max(200).escapeHTML().required(),
     },
     params: { postId: Joi.number().integer().min(1).required() },
   });
@@ -14,7 +14,7 @@ export const createCommentValidation = (req, res, next) => {
 export const updateCommentValidation = (req, res, next) => {
   const schema = Joi.object({
     body: {
-      content: Joi.string().min(1).max(200),
+      content: Joi.string().min(1).max(200).escapeHTML().required(),
     },
     params: {
       postId: Joi.number().integer().min(1).required(),

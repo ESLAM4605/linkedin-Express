@@ -11,7 +11,6 @@ import languageModel from "../../languages/models/languages.model.js";
 import postModel from "../../post/models/posts.model.js";
 import friendshipModel from "../models/friendships.model.js";
 import sendmail from "../../utils/email.sender.js";
-import commentModel from "../../post/models/comments.model.js";
 
 export const searchForOneUser = CatchError(async (req, res) => {
   const { user } = req.query;
@@ -22,8 +21,10 @@ export const searchForOneUser = CatchError(async (req, res) => {
     },
   });
   if (users.length) return res.status(200).json(users);
+
   throw new AppError("No user found", 404);
 });
+
 export const signUp = CatchError(async (req, res) => {
   const { userName, firstName, lastName, email, password, age } = req.body;
 
@@ -81,6 +82,7 @@ export const signUp = CatchError(async (req, res) => {
     text: `Please copy the link to Your URL incase it is not Clickble :
      ${createLink}`,
   });
+
   if (newUser)
     return res.status(201).json({
       message: "Signed Up Successfully",
@@ -92,6 +94,7 @@ export const signUp = CatchError(async (req, res) => {
 
 export const verfyEmail = CatchError(async (req, res) => {
   const { token } = req.params;
+
   const { email } = Jwt.verify(token, process.env.SECRET_KEY);
 
   const user = await userModel.findOne({ where: { email } });
@@ -171,7 +174,7 @@ export const signIn = CatchError(async (req, res) => {
   const token = Jwt.sign(
     { id, userName, firstName, lastName, age, role },
     process.env.SECRET_KEY,
-    { expiresIn: "15min" }
+    { expiresIn: "15d" }
   );
   const refreshToken = Jwt.sign(
     { id, userName, firstName, lastName, age, role, isRefresh: true },
@@ -479,6 +482,7 @@ export const rejectRequest = CatchError(async (req, res) => {
 
   res.status(200).json({ message: "Request rejected", data });
 });
+
 export const acceptRequest = CatchError(async (req, res) => {
   const { id: user2Id } = req.user;
 
@@ -520,6 +524,7 @@ export const listOfFriends = CatchError(async (req, res) => {
 
   res.status(200).json(data);
 });
+
 export const listOfPendingRecivedRequestes = CatchError(async (req, res) => {
   const { id } = req.user;
 
@@ -529,6 +534,7 @@ export const listOfPendingRecivedRequestes = CatchError(async (req, res) => {
 
   res.status(200).json(data);
 });
+
 export const listOfPendingSentRequestes = CatchError(async (req, res) => {
   const { id } = req.user;
   const data = await friendshipModel.findAll({

@@ -1,9 +1,9 @@
-import Joi from "joi";
+import Joi from "../../middlewares/joi.extend.js";
 import { validator } from "../../utils/validation.middelware.js";
 export const createSkillValidation = (req, res, next) => {
   const schema = Joi.object({
     body: {
-      name: Joi.string().min(3).max(30).required(),
+      name: Joi.string().min(3).max(30).escapeHTML().required(),
     },
   });
   validator(req, schema);
@@ -13,7 +13,7 @@ export const createSkillValidation = (req, res, next) => {
 export const updateSkillValidation = (req, res, next) => {
   const schema = Joi.object({
     body: {
-      name: Joi.string().min(3).max(30),
+      name: Joi.string().min(3).max(30).escapeHTML().required(),
     },
     params: { id: Joi.number().integer().min(1).required() },
   });
