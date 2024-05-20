@@ -2,7 +2,7 @@ import express from "express";
 import path, { dirname } from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
-
+import helmet from "helmet";
 export const __dirname = dirname(fileURLToPath(import.meta.url));
 
 import dotenv from "dotenv";
@@ -13,11 +13,11 @@ import experiencesRouter from "./src/experience/routes/experiences.routes.js";
 import educationRouter from "./src/education/routes/education.router.js";
 import { AppError } from "./src/utils/errorhandler.js";
 import reactRouter from "./src/react/router/react.router.js";
+import { app, server } from "./src/socket/socket.gateway.js";
 
 dotenv.config();
 
-const app = express();
-
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json());
 app.use("/users", userRouter);
 app.use("/posts", postRouter);
@@ -49,6 +49,6 @@ app.use((error, req, res, next) => {
     });
   }
 });
-app.listen(process.env.PORT, () =>
+server.listen(process.env.PORT, () =>
   console.log(`Server running on port ${process.env.PORT}!`)
 );
